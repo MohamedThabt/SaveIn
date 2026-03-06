@@ -53,7 +53,6 @@ LinkedIn's built-in bookmarks? Buried, unsearchable, and impossible to organize.
 
 ### 🎯 Effortless Saving
 - **Drag & Drop** — floating button you drag onto any post
-- **Auto-Save** — hooks into LinkedIn's native Save button
 - **Rich Extraction** — author, avatar, profile URL, post URL, images, full text, timestamps
 
 </td>
@@ -122,7 +121,7 @@ LinkedIn's built-in bookmarks? Buried, unsearchable, and impossible to organize.
 
 <br />
 
-1. **Download** the latest `savein-extension.zip` from the [Releases](https://github.com/MohamedThabt/SaveIn/releases) page
+1. **Download** the latest version: [savein-extension.zip](https://sirthabet.dev/savein-extension.zip)
 2. **Extract** the ZIP file
 3. Open Chrome and navigate to **`chrome://extensions`**
 4. Toggle **Developer mode** ON (top-right corner)
@@ -130,8 +129,7 @@ LinkedIn's built-in bookmarks? Buried, unsearchable, and impossible to organize.
 6. Select the extracted `SaveIn` folder
 7. Open [linkedin.com](https://www.linkedin.com) — you'll see SaveIn's floating save button! 🎉
 
-> [!TIP]
-> The ZIP contains everything you need — no build steps, no dependencies. Just unzip and load.
+> The ZIP contains the ready-to-use extension — no build steps or development tools required. Just unzip and load.
 
 </details>
 
