@@ -387,62 +387,70 @@ export function Dashboard() {
           <span className="text-lg font-display font-semibold">Settings</span>
         </header>
 
-        <div className="flex-1 flex overflow-hidden w-full max-w-[1400px] mx-auto">
+        <div className="flex-1 flex overflow-hidden w-full max-w-[1400px] mx-auto p-4 md:p-8 gap-8">
           {/* Settings Sidebar */}
-          <aside className="w-[240px] border-r border-border/40 p-6 flex flex-col gap-2 shrink-0 bg-muted/5 overflow-y-auto hidden md:flex">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2 px-3">Preferences</div>
-            <nav className="flex flex-col gap-1.5">
-              <button onClick={() => setSettingsTab('appearance')} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${settingsTab === 'appearance' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                <Palette size={16} /> Appearance
-              </button>
-              <button onClick={() => setSettingsTab('categories')} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${settingsTab === 'categories' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                <Tag size={16} /> Categories
-              </button>
-              <button onClick={() => setSettingsTab('notion')} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${settingsTab === 'notion' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                <Upload size={16} /> Notion Sync
-              </button>
-              <button onClick={() => setSettingsTab('data')} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${settingsTab === 'data' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
-                <FolderUp size={16} /> Data Management
-              </button>
-            </nav>
-            <div className="mt-auto pt-6 border-t border-border/40 flex flex-col gap-3 px-3">
-              <a href="https://github.com/MohamedThabt/SaveIn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[13px] text-muted-foreground hover:text-primary transition-colors font-medium">
-                <Github size={14} /> Source Code
-              </a>
-              <a href="https://sirthabet.dev/posts/savein-linkedin-chrome-extension-guide" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[13px] text-muted-foreground hover:text-primary transition-colors font-medium">
-                <BookOpen size={14} /> Documentation
-              </a>
-              <a href="https://sirthabet.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[13px] text-muted-foreground hover:text-primary transition-colors font-medium">
-                <Globe size={14} /> Mohamed Thabet
-              </a>
+          <aside className="w-[260px] flex flex-col gap-6 shrink-0 hidden md:flex">
+            <div className="px-2">
+              <h3 className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground/80 mb-3">Settings</h3>
+              <nav className="flex flex-col gap-1.5">
+                <button onClick={() => setSettingsTab('appearance')} className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${settingsTab === 'appearance' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                  <Palette size={18} /> Appearance
+                </button>
+                <button onClick={() => setSettingsTab('categories')} className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${settingsTab === 'categories' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                  <Tag size={18} /> Labels & Categories
+                </button>
+                <button onClick={() => setSettingsTab('notion')} className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${settingsTab === 'notion' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                  <Upload size={18} /> Notion Sync
+                </button>
+                <button onClick={() => setSettingsTab('data')} className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${settingsTab === 'data' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                  <FolderUp size={18} /> Data Management
+                </button>
+              </nav>
+            </div>
+            
+            <div className="mt-auto px-2">
+              <h3 className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground/80 mb-3">Links</h3>
+              <div className="flex flex-col gap-1.5">
+                <a href="https://github.com/MohamedThabt/SaveIn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors font-medium">
+                  <Github size={16} /> Source Code
+                </a>
+                <a href="https://sirthabet.dev/posts/savein-linkedin-chrome-extension-guide" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors font-medium">
+                  <BookOpen size={16} /> Documentation
+                </a>
+                <a href="https://sirthabet.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors font-medium">
+                  <Globe size={16} /> Developer Site
+                </a>
+              </div>
             </div>
           </aside>
 
           {/* Settings Content */}
-          <main className="flex-1 overflow-y-auto p-6 md:p-10 lg:p-14 relative bg-background">
-            <div className="max-w-2xl mx-auto w-full transition-all duration-300">
+          <main className="flex-1 overflow-y-auto px-2 pb-12 relative remove-scrollbar">
+            <div className="max-w-3xl mx-auto w-full transition-all duration-300">
               
               {settingsTab === 'appearance' && (
-                <section className="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
-                  <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><Palette size={20} className="text-primary" /> Appearance</h2>
-                  <p className="text-sm text-muted-foreground mb-8">Customize the look and feel of the extention dashboard.</p>
+                <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-display font-bold mb-2">Appearance</h2>
+                    <p className="text-muted-foreground">Customize how the extension looks and feels.</p>
+                  </div>
                   
-                  <div className="flex flex-col gap-6">
-                    <div className="flex items-center justify-between p-4 bg-muted/30 border border-border/60 rounded-xl">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme === 'light' ? 'bg-amber-100 text-amber-600' : 'bg-primary/20 text-primary'}`}>
-                          {theme === 'light' ? <Sun size={20} /> : <Moon size={20} />}
+                  <div className="bg-card border border-border/40 rounded-3xl p-6 md:p-8 shadow-sm">
+                    <div className="flex items-center justify-between p-5 bg-background border border-border/40 rounded-2xl">
+                      <div className="flex items-center gap-5">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-inner ${theme === 'light' ? 'bg-amber-100/50 text-amber-600' : 'bg-indigo-500/10 text-indigo-400'}`}>
+                          {theme === 'light' ? <Sun size={24} /> : <Moon size={24} />}
                         </div>
                         <div>
-                          <div className="text-[14px] font-semibold">{theme === 'light' ? 'Light Mode' : 'Dark Mode'}</div>
-                          <div className="text-[12px] text-muted-foreground">Toggle between light and dark themes.</div>
+                          <div className="text-[15px] font-bold mb-0.5">{theme === 'light' ? 'Light Mode Active' : 'Dark Mode Active'}</div>
+                          <div className="text-[13px] text-muted-foreground">Switch the UI theme to match your system or preference.</div>
                         </div>
                       </div>
                       <button
                         onClick={toggleTheme}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${theme === 'dark' ? 'bg-primary' : 'bg-border hover:bg-border/80'}`}
+                        className={`w-14 h-7 rounded-full transition-colors relative shadow-inner ${theme === 'dark' ? 'bg-primary' : 'bg-muted-foreground/30 hover:bg-muted-foreground/40'}`}
                       >
-                        <div className={`w-5 h-5 rounded-full bg-white shadow-sm absolute top-0.5 transition-all ${theme === 'dark' ? 'left-[26px]' : 'left-0.5'}`} />
+                        <div className={`w-6 h-6 rounded-full bg-white shadow-md absolute top-0.5 transition-all ${theme === 'dark' ? 'left-[30px]' : 'left-0.5'}`} />
                       </button>
                     </div>
                   </div>
@@ -450,120 +458,141 @@ export function Dashboard() {
               )}
 
               {settingsTab === 'categories' && (
-                <section className="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
-                  <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><Tag size={20} className="text-primary" /> Label Categories</h2>
-                  <p className="text-sm text-muted-foreground mb-6">Manage distinct labels to organize and highlight your saved posts creatively.</p>
-                  <div className="flex flex-wrap gap-2.5 mb-6">
-                    {categories.map((c) => (
-                      <div key={c.name} className="flex items-center gap-2 px-4 py-2 border border-border/60 rounded-full bg-background text-[13px] font-medium group transition-all hover:border-border shadow-sm">
-                        <span className="w-3 h-3 rounded-full shrink-0 shadow-sm" style={{ background: c.color }} />
-                        {c.name}
-                        <button onClick={() => setCategoryToDelete(c.name)} className="opacity-40 hover:opacity-100 transition-opacity ml-1 bg-destructive/10 rounded-full p-1 hover:bg-destructive/20 text-destructive">
-                          <X size={12} />
-                        </button>
-                      </div>
-                    ))}
+                <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-display font-bold mb-2">Labels & Categories</h2>
+                    <p className="text-muted-foreground">Manage colorful tags to keep your saved posts neatly organized.</p>
                   </div>
-                  <div className="flex gap-3 max-w-md bg-muted/30 p-4 rounded-xl border border-border/50">
-                    <input value={newCatName} onChange={(e) => setNewCatName(e.target.value)} placeholder="Type new category..." className="flex-1 px-4 py-2.5 border border-border/60 rounded-lg text-sm bg-background outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm" />
-                    <div className="relative w-11 h-11 shrink-0 rounded-lg border border-border/60 shadow-sm overflow-hidden flex items-center justify-center cursor-pointer hover:border-border transition-colors bg-background">
-                      <input type="color" value={newCatColor} onChange={(e) => setNewCatColor(e.target.value)} className="absolute inset-[-10px] w-20 h-20 opacity-0 cursor-pointer z-10" />
-                      <div className="w-5 h-5 rounded-full shadow-inner" style={{ background: newCatColor }} />
+
+                  <div className="bg-card border border-border/40 rounded-3xl p-6 md:p-8 shadow-sm">
+                    <div className="flex flex-wrap gap-3 mb-8">
+                      {categories.map((c) => (
+                        <div key={c.name} className="flex items-center gap-2.5 px-4 py-2.5 border border-border/60 rounded-xl bg-background/50 text-[14px] font-semibold group transition-all hover:border-primary/30 hover:shadow-sm">
+                          <span className="w-3.5 h-3.5 rounded-full shadow-sm" style={{ background: c.color }} />
+                          {c.name}
+                          <button onClick={() => setCategoryToDelete(c.name)} className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 p-1 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive">
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                    <button onClick={addCategory} className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-2">
-                       Create
-                    </button>
+
+                    <div className="border-t border-border/40 pt-8">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">Create New Label</h3>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <input value={newCatName} onChange={(e) => setNewCatName(e.target.value)} placeholder="e.g. Inspiration, Code, Design" className="flex-1 px-5 py-3.5 border border-border/60 rounded-2xl text-[15px] bg-background outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm font-medium" />
+                        <div className="flex gap-4">
+                          <div className="relative w-14 h-14 shrink-0 rounded-2xl border border-border/60 shadow-sm overflow-hidden flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors bg-background">
+                            <input type="color" value={newCatColor} onChange={(e) => setNewCatColor(e.target.value)} className="absolute inset-[-20px] w-32 h-32 opacity-0 cursor-pointer z-10" />
+                            <div className="w-6 h-6 rounded-full shadow-md border border-black/10" style={{ background: newCatColor }} />
+                          </div>
+                          <button onClick={addCategory} className="px-8 py-3.5 bg-primary text-primary-foreground rounded-2xl text-[15px] font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 h-14">
+                            <Plus size={18} /> Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </section>
               )}
 
               {settingsTab === 'notion' && (
-                <section className="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
-                  <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><Upload size={20} className="text-primary" /> Notion Integration</h2>
-                  <p className="text-sm text-muted-foreground mb-6">Connect your Notion workspace to automatically sync saved posts into a database.</p>
-                  <div className="flex flex-col gap-6">
-                    {/* Step 1: Token */}
-                    <div className="bg-muted/30 p-5 rounded-xl border border-border/50">
-                      <label className="text-[12px] font-bold text-foreground mb-1 block">Integration Token</label>
-                      <p className="text-[12px] text-muted-foreground mb-3">Create an integration at <a href="https://www.notion.so/my-integrations" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">notion.so/my-integrations</a>, then paste the token below.</p>
-                      <input type="password" value={notionToken} onChange={(e) => setNotionToken(e.target.value)} placeholder="secret_..." className="w-full px-4 py-3 border border-border/50 rounded-lg text-sm bg-background outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm" />
+                <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-display font-bold mb-2">Notion Database Sync</h2>
+                    <p className="text-muted-foreground">Automatically backup your curated posts directly to a Notion database.</p>
+                  </div>
+
+                  <div className="bg-card border border-border/40 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col gap-8">
+                    
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[13px] font-bold text-foreground">1. Integration Token</label>
+                        <p className="text-[13px] text-muted-foreground mb-1">Create an internal integration in your <a href="https://www.notion.so/my-integrations" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Notion Workspace</a>.</p>
+                        <input type="password" value={notionToken} onChange={(e) => setNotionToken(e.target.value)} placeholder="secret_..." className="w-full px-5 py-3.5 border border-border/60 rounded-2xl text-[14px] bg-background outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm font-medium" />
+                      </div>
+                      
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[13px] font-bold text-foreground">2. Database Link</label>
+                        <p className="text-[13px] text-muted-foreground mb-1">Copy the link to your specific database page.</p>
+                        <input value={notionDb} onChange={(e) => setNotionDb(e.target.value)} placeholder="https://notion.so/..." className="w-full px-5 py-3.5 border border-border/60 rounded-2xl text-[14px] bg-background outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm font-medium" />
+                      </div>
                     </div>
-                    {/* Step 2: Database URL */}
-                    <div className="bg-muted/30 p-5 rounded-xl border border-border/50">
-                      <label className="text-[12px] font-bold text-foreground mb-1 block">Database URL or ID</label>
-                      <p className="text-[12px] text-muted-foreground mb-3">Open your Notion database, click <strong>Share → Copy link</strong>, and paste it here.</p>
-                      <input value={notionDb} onChange={(e) => setNotionDb(e.target.value)} placeholder="https://notion.so/workspace/abc123..." className="w-full px-4 py-3 border border-border/50 rounded-lg text-sm bg-background outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm" />
-                    </div>
-                    {/* Test + Save */}
-                    <div className="flex items-center gap-3">
-                      <button onClick={testNotion} disabled={testingNotion} className="px-5 py-3 bg-secondary text-secondary-foreground border border-border/60 rounded-xl text-sm font-semibold hover:bg-secondary/80 transition-all shadow-sm flex items-center gap-2 disabled:opacity-50 flex-1 justify-center">
-                        {testingNotion ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+
+                    <div className="flex flex-wrap items-center gap-4">
+                      <button onClick={testNotion} disabled={testingNotion} className="px-6 py-3.5 bg-background border border-border/60 rounded-2xl text-[14px] font-bold hover:bg-muted transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 min-w-[200px]">
+                        {testingNotion ? <Loader2 size={18} className="animate-spin" /> : <RefreshCw size={18} />}
                         Test Connection
                       </button>
-                      <button onClick={saveNotionSettings} className="px-6 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-2 flex-1 justify-center">
-                        <Check size={16} /> Save Credentials
+                      <button onClick={saveNotionSettings} className="px-8 py-3.5 bg-primary text-primary-foreground rounded-2xl text-[14px] font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 min-w-[200px]">
+                        <Check size={18} /> Save Settings
                       </button>
+                      
+                      {/* Connection Result */}
+                      {notionTestResult && (
+                        <div className={`flex items-center gap-2 text-[14px] font-semibold px-5 py-3.5 rounded-2xl border ml-auto ${notionTestResult.ok ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
+                          {notionTestResult.ok ? <Check size={16} /> : <AlertCircle size={16} />}
+                          {notionTestResult.msg}
+                        </div>
+                      )}
                     </div>
-                    {/* Test Result */}
-                    {notionTestResult && (
-                      <div className={`flex items-center gap-2 text-sm font-medium px-4 py-3 rounded-xl border ${notionTestResult.ok ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
-                        {notionTestResult.ok ? <Check size={16} /> : <AlertCircle size={16} />}
-                        {notionTestResult.msg}
-                      </div>
-                    )}
-                    {notionDbName && !notionTestResult && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-                        <Check size={16} className="text-green-500" /> Connected to workspace DB: <strong className="text-foreground">{notionDbName}</strong>
-                      </div>
-                    )}
                     
-                    {/* Sync Options */}
-                    <div className="pt-4 mt-2 border-t border-border/50">
-                      <div className="flex items-center justify-between p-5 bg-muted/40 border border-border/60 rounded-xl mb-6">
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${notionAutoSync ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                            <Zap size={18} />
+                    {/* Active Connection Warning */}
+                    {notionDbName && !notionTestResult && (
+                      <div className="flex items-center gap-2 text-[14px] font-medium text-muted-foreground bg-green-500/5 border border-green-500/10 px-5 py-3 rounded-2xl">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" /> Connected to: <strong className="text-foreground">{notionDbName}</strong>
+                      </div>
+                    )}
+
+                    <div className="h-px bg-border/40 w-full" />
+
+                    {/* Sync Behavior */}
+                    <div>
+                      <div className="flex items-center justify-between p-6 bg-background border border-border/40 rounded-3xl mb-6 shadow-sm">
+                        <div className="flex items-center gap-5">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-indigo-500/10 text-indigo-500`}>
+                            <Zap size={24} />
                           </div>
                           <div>
-                            <div className="text-[14px] font-bold">Auto-sync directly</div>
-                            <div className="text-[12px] text-muted-foreground">Automatically push posts to Notion when saved on LinkedIn</div>
+                            <div className="text-[16px] font-bold mb-1">Instant Auto-Sync</div>
+                            <div className="text-[14px] text-muted-foreground">Push new posts to Notion the moment you save them on LinkedIn.</div>
                           </div>
                         </div>
                         <button
                           onClick={() => { const next = !notionAutoSync; setNotionAutoSync(next); chrome.runtime.sendMessage({ action: 'SAVE_NOTION_SETTINGS', payload: { notion_auto_sync: next } }) }}
-                          className={`w-12 h-6 rounded-full transition-colors relative ${notionAutoSync ? 'bg-primary' : 'bg-border hover:bg-border/80'}`}
+                          className={`w-14 h-7 rounded-full transition-colors relative shadow-inner ${notionAutoSync ? 'bg-primary' : 'bg-muted-foreground/30 hover:bg-muted-foreground/40'}`}
                         >
-                          <div className={`w-5 h-5 rounded-full bg-white shadow-sm absolute top-0.5 transition-all ${notionAutoSync ? 'left-[26px]' : 'left-0.5'}`} />
+                          <div className={`w-6 h-6 rounded-full bg-white shadow-md absolute top-0.5 transition-all ${notionAutoSync ? 'left-[30px]' : 'left-0.5'}`} />
                         </button>
                       </div>
 
-                      <h3 className="text-[12px] font-bold text-foreground mb-3 uppercase tracking-wider">Sync Status</h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-                        <div className="text-center p-4 bg-muted/20 border border-border/40 rounded-xl">
-                          <div className="text-[18px] font-bold text-green-500 mb-1">{syncStats.synced}</div>
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Synced</div>
+                      {/* Sync Metrics */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div className="p-5 bg-background border border-border/40 rounded-3xl flex flex-col items-center justify-center shadow-sm">
+                          <div className="text-2xl font-black text-green-500 mb-1">{syncStats.synced}</div>
+                          <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Synced</div>
                         </div>
-                        <div className="text-center p-4 bg-muted/20 border border-border/40 rounded-xl">
-                          <div className="text-[18px] font-bold text-amber-500 mb-1">{syncStats.pending}</div>
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pending</div>
+                        <div className="p-5 bg-background border border-border/40 rounded-3xl flex flex-col items-center justify-center shadow-sm">
+                          <div className="text-2xl font-black text-amber-500 mb-1">{syncStats.pending}</div>
+                          <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Pending</div>
                         </div>
-                        <div className="text-center p-4 bg-muted/20 border border-border/40 rounded-xl">
-                          <div className="text-[18px] font-bold text-red-500 mb-1">{syncStats.failed}</div>
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Failed</div>
+                        <div className="p-5 bg-background border border-border/40 rounded-3xl flex flex-col items-center justify-center shadow-sm">
+                          <div className="text-2xl font-black text-destructive mb-1">{syncStats.failed}</div>
+                          <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Failed</div>
                         </div>
-                        <div className="text-center p-4 bg-muted/20 border border-border/40 rounded-xl">
-                          <div className="text-[18px] font-bold text-muted-foreground mb-1">{syncStats.unsynced}</div>
-                          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Unsynced</div>
+                        <div className="p-5 bg-background border border-border/40 rounded-3xl flex flex-col items-center justify-center shadow-sm">
+                          <div className="text-2xl font-black text-muted-foreground mb-1">{syncStats.unsynced}</div>
+                          <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Unsynced</div>
                         </div>
                       </div>
 
-                      <div className="flex gap-3">
-                        <button onClick={syncAll} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md">
-                          <RefreshCw size={16} /> Sync All Missing
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <button onClick={syncAll} className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-primary text-primary-foreground rounded-2xl text-[15px] font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                          <RefreshCw size={18} /> Sync All Missing Posts
                         </button>
                         {syncStats.failed > 0 && (
-                          <button onClick={retryFailed} className="flex flex-1 items-center justify-center gap-2 px-4 py-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl text-sm font-semibold hover:bg-destructive/20 transition-all">
-                            <AlertCircle size={16} /> Retry {syncStats.failed} Failed
+                          <button onClick={retryFailed} className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-destructive/10 text-destructive border border-destructive/20 rounded-2xl text-[15px] font-bold hover:bg-destructive/20 transition-all">
+                            <AlertCircle size={18} /> Retry Errors
                           </button>
                         )}
                       </div>
@@ -573,41 +602,60 @@ export function Dashboard() {
               )}
 
               {settingsTab === 'data' && (
-                <section className="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
-                  <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><FolderUp size={20} className="text-primary" /> Data Management</h2>
-                  <p className="text-sm text-muted-foreground mb-6">Safely export your storage or restore from an earlier backup JSON file.</p>
+                <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-display font-bold mb-2">Data Management</h2>
+                    <p className="text-muted-foreground">Safely export your storage or restore from an earlier backup JSON file.</p>
+                  </div>
                   
-                  <div className="space-y-4">
-                    <div className="p-4 border border-border/50 rounded-xl bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <h3 className="text-[14px] font-semibold mb-1">Export Full JSON Backup</h3>
-                        <p className="text-[12px] text-muted-foreground">Download all posts, labels, and metadata as a raw JSON file. Restorable later.</p>
+                  <div className="bg-card border border-border/40 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col gap-4">
+                    
+                    <div className="p-6 md:p-7 border border-border/40 rounded-3xl bg-background flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-border/80 transition-colors shadow-sm">
+                      <div className="flex gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                          <Download size={24} />
+                        </div>
+                        <div>
+                          <h3 className="text-[16px] font-bold mb-1">Export Full JSON Backup</h3>
+                          <p className="text-[14px] text-muted-foreground leading-relaxed">Download all posts, labels, and metadata as a raw JSON file. You can restore your entire library using this file later.</p>
+                        </div>
                       </div>
-                      <button onClick={exportBackup} className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 border border-border/80 shadow-sm bg-background rounded-lg text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all">
-                        <Download size={16} /> Export JSON
+                      <button onClick={exportBackup} className="shrink-0 flex items-center justify-center gap-2 px-6 py-3.5 border border-border/60 hover:bg-muted bg-background rounded-2xl text-[14px] font-bold transition-all w-full md:w-auto">
+                        Export JSON
                       </button>
                     </div>
 
-                    <div className="p-4 border border-border/50 rounded-xl bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <h3 className="text-[14px] font-semibold mb-1">Restore from Backup</h3>
-                        <p className="text-[12px] text-muted-foreground">Upload an existing JSON backup. This merges with current data cleanly.</p>
+                    <div className="p-6 md:p-7 border border-border/40 rounded-3xl bg-background flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-border/80 transition-colors shadow-sm">
+                      <div className="flex gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                          <Upload size={24} />
+                        </div>
+                        <div>
+                          <h3 className="text-[16px] font-bold mb-1">Restore from Backup</h3>
+                          <p className="text-[14px] text-muted-foreground leading-relaxed">Upload an existing JSON backup. This merges with your current data cleanly without erasing new saves.</p>
+                        </div>
                       </div>
-                      <label className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 border border-border/80 shadow-sm bg-background rounded-lg text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all cursor-pointer">
-                        <Upload size={16} /> Import
+                      <label className="shrink-0 flex items-center justify-center gap-2 px-6 py-3.5 border border-border/60 hover:bg-muted bg-background rounded-2xl text-[14px] font-bold transition-all cursor-pointer w-full md:w-auto">
+                        Select File
                         <input type="file" accept=".json" onChange={importBackup} className="hidden" />
                       </label>
                     </div>
 
-                    <div className="p-4 border border-border/50 rounded-xl bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <h3 className="text-[14px] font-semibold mb-1">Export as Markdown Files</h3>
-                        <p className="text-[12px] text-muted-foreground">Turn every saved post into a single massive unified markdown file.</p>
+                    <div className="p-6 md:p-7 border border-border/40 rounded-3xl bg-background flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-border/80 transition-colors shadow-sm">
+                      <div className="flex gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                          <FileText size={24} />
+                        </div>
+                        <div>
+                          <h3 className="text-[16px] font-bold mb-1">Export as Markdown</h3>
+                          <p className="text-[14px] text-muted-foreground leading-relaxed">Turn every saved post into a single massive unified markdown document, perfect for Obsidian or local editors.</p>
+                        </div>
                       </div>
-                      <button onClick={exportAllMd} className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 border border-border/80 shadow-sm bg-background rounded-lg text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all">
-                        <FileText size={16} /> Export MD
+                      <button onClick={exportAllMd} className="shrink-0 flex items-center justify-center gap-2 px-6 py-3.5 border border-border/60 hover:bg-muted bg-background rounded-2xl text-[14px] font-bold transition-all w-full md:w-auto">
+                        Export MD
                       </button>
                     </div>
+
                   </div>
                 </section>
               )}
@@ -650,19 +698,49 @@ export function Dashboard() {
   // ── POSTS VIEW ──
   return (
     <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden font-sans">
-      {/* Topbar */}
-      <header className="flex items-center justify-between px-6 h-16 border-b border-border/50 shrink-0 bg-background/80 backdrop-blur-xl z-20 shadow-sm">
-        <div className="flex items-center gap-3">
+      {/* Topbar with Insights + Search */}
+      <header className="flex items-center justify-between px-6 h-[72px] border-b border-border/50 shrink-0 bg-background/80 backdrop-blur-xl z-20 shadow-sm">
+        {/* Left: Logo */}
+        <div className="flex items-center gap-3 shrink-0">
           <div className="w-8 h-8 rounded-xl bg-primary shadow-lg shadow-primary/20 flex items-center justify-center">
             <Bookmark size={16} className="text-primary-foreground" />
           </div>
-          <span className="text-base font-display font-bold tracking-tight">LinkedIn Saver</span>
+          <span className="text-base font-display font-bold tracking-tight">SaveIn</span>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Center: Search */}
+        <div className="flex-1 max-w-md mx-6 relative group">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+          <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search posts, authors, tags..." className="w-full pl-9 pr-8 py-2.5 bg-muted/40 border border-border/50 rounded-xl text-[13px] font-medium outline-none transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/10 focus:bg-background shadow-sm placeholder:text-muted-foreground/60" />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+              <X size={13} />
+            </button>
+          )}
+        </div>
+
+        {/* Right: Stats + Actions */}
+        <div className="flex items-center gap-4 shrink-0">
+          {/* Compact Stats */}
+          <div className="hidden lg:flex items-center gap-3">
+            {[
+              { icon: Bookmark, value: stats.total, label: 'Saved', color: 'text-primary' },
+              { icon: Users, value: stats.authors, label: 'Authors', color: 'text-violet-500' },
+              { icon: Clock, value: stats.recent, label: 'This Week', color: 'text-emerald-500' },
+            ].map((s) => (
+              <div key={s.label} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/30 hover:border-border/60 transition-all group cursor-default">
+                <s.icon size={13} className={`${s.color} opacity-80 group-hover:opacity-100 transition-opacity`} />
+                <span className="text-[14px] font-display font-bold">{s.value}</span>
+                <span className="text-[10px] text-muted-foreground font-medium hidden xl:inline">{s.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="w-px h-6 bg-border/60" />
+
           <button onClick={toggleTheme} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/80 transition-all text-muted-foreground hover:text-foreground" title="Toggle Theme">
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
-          <div className="w-px h-5 bg-border mx-1" />
           <button onClick={() => setView('settings')} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/80 transition-all text-muted-foreground hover:text-foreground" title="Preferences">
             <Settings size={17} />
           </button>
@@ -670,36 +748,9 @@ export function Dashboard() {
       </header>
 
       <div className="flex flex-1 overflow-hidden relative z-10">
-        {/* Sidebar */}
-        <aside className="w-[260px] border-r border-border/50 flex flex-col bg-card/40 shrink-0">
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-2 p-4">
-            {[
-              { icon: Bookmark, value: stats.total, label: 'Saved' },
-              { icon: Tag, value: stats.categories, label: 'Tags' },
-              { icon: Users, value: stats.authors, label: 'Authors' },
-              { icon: Clock, value: stats.recent, label: '7 Days' },
-            ].map((s) => (
-              <div key={s.label} className="col-span-1 flex flex-col items-center py-3.5 rounded-2xl bg-background border border-border/40 shadow-sm hover:border-primary/40 hover:shadow-md transition-all group">
-                <s.icon size={14} className="text-muted-foreground group-hover:text-primary transition-colors mb-1.5" />
-                <span className="text-[17px] font-display font-bold leading-none">{s.value}</span>
-                <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mt-1 opacity-70 group-hover:opacity-100">{s.label}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="px-4 pb-4 flex flex-col gap-5 flex-1 overflow-y-auto mt-1">
-            {/* Search */}
-            <div className="relative group">
-              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search posts, authors, tags..." className="w-full pl-9 pr-8 py-2.5 bg-background border border-border/60 rounded-xl text-[13px] font-medium outline-none transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/10 shadow-sm placeholder:text-muted-foreground/60" />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                  <X size={13} />
-                </button>
-              )}
-            </div>
-
+        {/* Sidebar — Filtration Only */}
+        <aside className="w-[240px] border-r border-border/50 flex flex-col bg-card/40 shrink-0">
+          <div className="px-4 py-4 flex flex-col gap-5 flex-1 overflow-y-auto">
             {/* Sort */}
             <div>
               <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2 block pl-1">Sort By</span>
@@ -745,7 +796,7 @@ export function Dashboard() {
             {/* Authors */}
             <div>
               <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2.5 block pl-1">Authors</span>
-              <div className="flex flex-col gap-1 max-h-[200px] overflow-y-auto pr-1">
+              <div className="flex flex-col gap-1 max-h-[220px] overflow-y-auto pr-1">
                 {authorList.map(([name, { count, img }]) => {
                   const active = filterAuthor === name
                   return (
