@@ -263,6 +263,222 @@ function createSaveWidget(postNode: Element, saveBtn?: HTMLElement) {
   container.appendChild(overlay)
 }
 
+// ── Manual Add Form (shown on floating cursor click) ──
+function showManualAddForm() {
+  // Remove existing if open
+  const existing = document.querySelector('.ls-manual-overlay')
+  if (existing) { existing.remove(); return }
+
+  const overlay = document.createElement('div')
+  overlay.className = 'ls-manual-overlay'
+  overlay.style.cssText = `
+    position:fixed;top:0;right:0;bottom:0;left:0;z-index:10001;
+    background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;
+    animation:lsFadeIn 0.2s ease;
+  `
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove()
+  })
+
+  const form = document.createElement('div')
+  form.style.cssText = `
+    background:#fff;border-radius:16px;padding:20px;width:320px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.2);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:#1a1a2e;animation:lsSlideUp 0.25s ease;
+  `
+
+  getCategories().then((categories) => {
+    form.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:28px;height:28px;border-radius:8px;background:#0a66c2;display:flex;align-items:center;justify-content:center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <span style="font-weight:700;font-size:14px;">Manual Add</span>
+        </div>
+        <button class="ls-m-close" style="width:24px;height:24px;border-radius:6px;border:none;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#64748b;">✕</button>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Author <span style="color:#ef4444">*</span></label>
+        <input class="ls-m-author" placeholder="e.g. John Doe" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;outline:none;font-family:inherit;box-sizing:border-box;">
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Content</label>
+        <textarea class="ls-m-content" placeholder="Paste the post content here..." rows="3" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:12px;outline:none;resize:none;font-family:inherit;box-sizing:border-box;line-height:1.5;background:white;"></textarea>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Post URL</label>
+        <input class="ls-m-url" placeholder="https://linkedin.com/..." style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;outline:none;font-family:inherit;box-sizing:border-box;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Category</label>
+        <div class="ls-m-cat-grid" style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${categories.map((c) => `
+            <button class="ls-m-cat-btn" data-name="${c.name}" data-color="${c.color}" style="
+              display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1.5px solid #e2e8f0;
+              background:white;cursor:pointer;font-size:11px;font-weight:600;color:#334155;transition:all 0.15s;
+            ">
+              <span style="width:8px;height:8px;border-radius:50%;background:${c.color};display:inline-block;"></span>
+              ${c.name}
+            </button>
+          `).join('')}
+          <button class="ls-m-new-cat-btn" style="
+            padding:6px 12px;border-radius:20px;border:1.5px dashed #cbd5e1;
+            background:transparent;cursor:pointer;font-size:11px;font-weight:600;color:#94a3b8;transition:all 0.15s;
+          ">+ New</button>
+        </div>
+      </div>
+
+      <div class="ls-m-new-cat-form" style="display:none;margin-bottom:14px;padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input class="ls-m-new-cat-name" placeholder="Category name" style="
+            flex:1;padding:7px 10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:12px;outline:none;
+            font-family:inherit;background:white;
+          ">
+          <input class="ls-m-new-cat-color" type="color" value="#3b82f6" style="
+            width:36px;height:34px;border:none;border-radius:8px;cursor:pointer;padding:0;background:transparent;
+          ">
+        </div>
+        <button class="ls-m-add-cat" style="
+          width:100%;padding:7px;border-radius:8px;border:none;background:#0a66c2;color:white;
+          font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;
+        ">Add Category</button>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Note (optional)</label>
+        <textarea class="ls-m-note" placeholder="Why is this post important?" rows="2" style="
+          width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:12px;
+          outline:none;resize:none;font-family:inherit;box-sizing:border-box;line-height:1.5;background:white;
+        "></textarea>
+      </div>
+
+      <button class="ls-m-save" style="
+        width:100%;padding:10px;border-radius:10px;border:none;background:#0a66c2;color:white;
+        font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;
+        display:flex;align-items:center;justify-content:center;gap:6px;
+      ">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Post
+      </button>
+    `
+
+    // Wire up category pill buttons
+    let selectedCategory = ''
+    let selectedColor = ''
+
+    form.querySelectorAll('.ls-m-cat-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        form.querySelectorAll('.ls-m-cat-btn').forEach((b) => {
+          (b as HTMLElement).style.border = '1.5px solid #e2e8f0';
+          (b as HTMLElement).style.background = 'white'
+        })
+        const el = btn as HTMLElement
+        selectedCategory = el.dataset.name || ''
+        selectedColor = el.dataset.color || ''
+        el.style.border = `1.5px solid ${selectedColor}`
+        el.style.background = `${selectedColor}15`
+      })
+    })
+
+    // New category toggle
+    form.querySelector('.ls-m-new-cat-btn')?.addEventListener('click', () => {
+      const catForm = form.querySelector('.ls-m-new-cat-form') as HTMLElement
+      catForm.style.display = catForm.style.display === 'none' ? 'block' : 'none'
+    })
+
+    // Add new category
+    form.querySelector('.ls-m-add-cat')?.addEventListener('click', async () => {
+      const nameInput = form.querySelector('.ls-m-new-cat-name') as HTMLInputElement
+      const colorInput = form.querySelector('.ls-m-new-cat-color') as HTMLInputElement
+      const name = nameInput.value.trim()
+      if (!name) return
+      const newCat = { name, color: colorInput.value }
+      await saveCategory(newCat)
+
+      const grid = form.querySelector('.ls-m-cat-grid')!
+      const newBtn = document.createElement('button')
+      newBtn.className = 'ls-m-cat-btn'
+      newBtn.dataset.name = newCat.name
+      newBtn.dataset.color = newCat.color
+      newBtn.style.cssText = `
+        display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;
+        border:1.5px solid ${newCat.color};background:${newCat.color}15;
+        cursor:pointer;font-size:11px;font-weight:600;color:#334155;transition:all 0.15s;
+      `
+      newBtn.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${newCat.color};display:inline-block;"></span>${newCat.name}`
+      grid.insertBefore(newBtn, form.querySelector('.ls-m-new-cat-btn'))
+
+      selectedCategory = newCat.name
+      selectedColor = newCat.color
+
+      newBtn.addEventListener('click', () => {
+        form.querySelectorAll('.ls-m-cat-btn').forEach((b) => {
+          (b as HTMLElement).style.border = '1.5px solid #e2e8f0';
+          (b as HTMLElement).style.background = 'white'
+        })
+        newBtn.style.border = `1.5px solid ${newCat.color}`
+        newBtn.style.background = `${newCat.color}15`
+        selectedCategory = newCat.name
+        selectedColor = newCat.color
+      })
+
+      ;(form.querySelector('.ls-m-new-cat-form') as HTMLElement).style.display = 'none'
+      nameInput.value = ''
+    })
+
+    // Close
+    form.querySelector('.ls-m-close')?.addEventListener('click', () => overlay.remove())
+
+    // Save
+    form.querySelector('.ls-m-save')?.addEventListener('click', () => {
+      const author = (form.querySelector('.ls-m-author') as HTMLInputElement).value.trim()
+      const content = (form.querySelector('.ls-m-content') as HTMLTextAreaElement).value.trim()
+      const url = (form.querySelector('.ls-m-url') as HTMLInputElement).value.trim()
+      const note = (form.querySelector('.ls-m-note') as HTMLTextAreaElement).value.trim()
+
+      if (!author) return
+
+      const saveBtn = form.querySelector('.ls-m-save') as HTMLButtonElement
+      saveBtn.textContent = 'Adding...'
+      saveBtn.style.opacity = '0.6'
+
+      const payload = {
+        id: `m_${Date.now()}`,
+        url,
+        author,
+        content,
+        date_saved: new Date().toISOString(),
+        category: selectedCategory || null,
+        categoryColor: selectedColor || null,
+        note: note || null,
+        tags: [] as string[],
+      }
+
+      chrome.runtime.sendMessage({ action: 'SAVE_POST', payload }, (res) => {
+        if (res?.success) {
+          saveBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Added!'
+          saveBtn.style.background = '#16a34a'
+          saveBtn.style.opacity = '1'
+          setTimeout(() => overlay.remove(), 1200)
+        } else {
+          saveBtn.textContent = 'Error — try again'
+          saveBtn.style.background = '#dc2626'
+          saveBtn.style.opacity = '1'
+        }
+      })
+    })
+  })
+
+  overlay.appendChild(form)
+  document.body.appendChild(overlay)
+}
+
 // ── Floating Drag-to-Save Cursor ──
 export function initFloatingCursor() {
   const cursor = document.createElement('div')
@@ -347,6 +563,8 @@ export function initFloatingCursor() {
       initialBottom = 30
       isDragging = false
     } else if (isClick) {
+      // Show Manual Add form on click
+      showManualAddForm()
       cursor.style.transform = 'scale(1.1)'
       setTimeout(() => cursor.style.transform = '', 150)
     }
