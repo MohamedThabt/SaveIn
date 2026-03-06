@@ -25,7 +25,12 @@ import {
   RefreshCw,
   Zap,
   AlertCircle,
-  Loader2
+  Loader2,
+  LayoutGrid,
+  List,
+  Github,
+  BookOpen,
+  Globe
 } from 'lucide-react'
 
 import {
@@ -103,6 +108,7 @@ export function Dashboard() {
   const [newCatName, setNewCatName] = useState('')
   const [newCatColor, setNewCatColor] = useState('#3b82f6')
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
 
   // Modals state
   const [postToDelete, setPostToDelete] = useState<Post | null>(null)
@@ -500,6 +506,21 @@ export function Dashboard() {
               </label>
             </div>
           </section>
+
+          {/* Footer */}
+          <footer className="mt-8 mb-4 pt-6 border-t border-border/30 flex items-center justify-center gap-6 text-[12px] text-muted-foreground">
+            <a href="https://github.com/MohamedThabt/SaveIn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors font-medium">
+              <Github size={13} /> GitHub
+            </a>
+            <span className="w-1 h-1 rounded-full bg-border" />
+            <a href="https://sirthabet.dev/posts/savein-linkedin-chrome-extension-guide" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors font-medium">
+              <BookOpen size={13} /> Docs
+            </a>
+            <span className="w-1 h-1 rounded-full bg-border" />
+            <a href="https://sirthabet.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors font-medium">
+              <Globe size={13} /> Mohamed Thabet
+            </a>
+          </footer>
         </div>
 
         {/* Delete Category Alert */}
@@ -606,83 +627,165 @@ export function Dashboard() {
 
         {/* Post List */}
         <main className="flex-1 flex flex-col overflow-hidden bg-muted/20">
-          <div className="flex items-center justify-between px-7 h-14 border-b border-border/40 shrink-0 bg-background/50 backdrop-blur-md">
+          <div className="flex items-center justify-between px-7 h-14 border-b border-border/40 shrink-0 bg-background/50 backdrop-blur-md z-10">
             <div className="flex items-center gap-2.5">
-              <h2 className="text-sm font-display font-bold">Your Library</h2>
+              <h2 className="text-[15px] font-display font-bold">Your Library</h2>
               <span className="text-[10px] font-bold bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{filtered.length} entries</span>
+            </div>
+            
+            <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-xl border border-border/40 shadow-sm">
+              <button 
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 rounded-lg transition-all flex items-center justify-center ${viewMode === 'list' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
+                title="List View"
+              >
+                <List size={14} />
+              </button>
+              <button 
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded-lg transition-all flex items-center justify-center ${viewMode === 'grid' ? 'bg-background shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
+                title="Grid View"
+              >
+                <LayoutGrid size={14} />
+              </button>
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 lg:p-6 scroll-smooth">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground pb-20">
-                <div className="w-20 h-20 rounded-full bg-border/40 flex items-center justify-center mb-5 shadow-inner">
-                  <Bookmark size={36} className="text-muted-foreground/50" />
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground pb-20 mt-10">
+                <div className="w-24 h-24 rounded-3xl bg-background border border-dashed border-border flex items-center justify-center mb-6 shadow-sm relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <Bookmark size={40} className="text-muted-foreground/40 group-hover:text-primary/60 transition-colors duration-500 group-hover:scale-110" />
                 </div>
-                <p className="text-base font-display font-semibold text-foreground/80">Nothing found</p>
-                <p className="text-[13px] mt-1.5 opacity-70">Adjust your search or start saving via the extension</p>
+                <h3 className="text-lg font-display font-medium text-foreground tracking-tight">Nothing to see here</h3>
+                <p className="text-[14px] mt-2 opacity-60 max-w-[260px] text-center leading-relaxed">Adjust your filters or save some new posts to build your collection.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-3 max-w-4xl mx-auto">
+              <div className={viewMode === 'list' ? "grid grid-cols-1 gap-3 max-w-4xl mx-auto" : "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 max-w-7xl mx-auto"}>
                 {filtered.map((p) => {
                   const isSelected = selected?.id === p.id
-                  return (
-                    <div key={p.id} className={`w-full text-left p-4 flex flex-col sm:flex-row items-start gap-4 transition-all duration-300 rounded-2xl border group cursor-pointer ${isSelected ? 'bg-background border-primary shadow-md ring-1 ring-primary/20 scale-[1.01]' : 'bg-card border-border/60 shadow-sm hover:border-primary/40 hover:shadow-md hover:scale-[1.01]'}`}
-                      onClick={() => setSelected(p)}>
-                      {p.authorImageUrl ? (
-                        <img src={p.authorImageUrl} alt={p.author} className={`w-10 h-10 rounded-full object-cover shrink-0 transition-shadow ${isSelected ? 'ring-2 ring-primary/30' : 'group-hover:ring-2 group-hover:ring-primary/10'}`} />
-                      ) : (
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-colors ${isSelected ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary/80'}`}>
-                          {(p.author || 'U').substring(0, 2).toUpperCase()}
+                  
+                  if (viewMode === 'list') {
+                    return (
+                      <div key={p.id} className={`w-full text-left p-4 flex flex-col sm:flex-row items-stretch gap-4 transition-all duration-300 rounded-2xl border group cursor-pointer ${isSelected ? 'bg-background border-primary shadow-md ring-1 ring-primary/20 scale-[1.01] -translate-y-0.5' : 'bg-card border-border/60 shadow-sm hover:border-border hover:shadow-md hover:-translate-y-0.5'}`}
+                        onClick={() => setSelected(p)}>
+                        {/* Author Info (Left) */}
+                        <div className="flex flex-col items-center md:min-w-[48px] shrink-0 pt-1">
+                          {p.authorImageUrl ? (
+                            <img src={p.authorImageUrl} alt={p.author} className={`w-10 h-10 rounded-full object-cover transition-shadow ${isSelected ? 'ring-2 ring-primary/30' : 'group-hover:ring-2 group-hover:ring-primary/10'}`} />
+                          ) : (
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${isSelected ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary/80'}`}>
+                              {(p.author || 'U').substring(0, 2).toUpperCase()}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      <div className="flex-1 min-w-0 pr-2">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="text-[13.5px] font-display font-bold truncate group-hover:text-primary transition-colors">{p.author}</h3>
-                          <span className="text-[10px] font-medium text-muted-foreground shrink-0 bg-muted/50 px-2 py-0.5 rounded-md">{formatDate(p.date_saved)}</span>
-                        </div>
-                        <p className="text-[12.5px] text-muted-foreground/90 leading-relaxed line-clamp-2 w-full">{p.content}</p>
-                        <div className="flex items-center justify-between mt-3">
-                          <div className="flex flex-wrap items-center gap-2">
-                            {p.category && (
-                              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md bg-white border border-border shadow-sm text-slate-800" style={{ borderColor: `${p.categoryColor}30` }}>
-                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: p.categoryColor || '#64748b' }} />
-                                {p.category}
-                              </span>
-                            )}
-                            {p.note && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-accent text-accent-foreground">
-                                <StickyNote size={10} /> Has note
-                              </span>
-                            )}
-                            {p.notionSyncStatus === 'synced' && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400 border border-green-200 dark:border-green-800">
-                                <Check size={8} /> Synced
-                              </span>
-                            )}
-                            {p.notionSyncStatus === 'pending' && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                                <Loader2 size={8} className="animate-spin" /> Syncing
-                              </span>
-                            )}
-                            {p.notionSyncStatus === 'failed' && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400 border border-red-200 dark:border-red-800">
-                                <AlertCircle size={8} /> Failed
-                              </span>
-                            )}
+
+                        {/* Content (Middle) */}
+                        <div className="flex-1 min-w-0 pr-2 flex flex-col justify-center">
+                          <div className="flex items-center justify-between mb-1">
+                            <h3 className="text-[14px] font-display font-semibold truncate group-hover:text-primary transition-colors">{p.author}</h3>
+                            <span className="text-[10.5px] font-medium text-muted-foreground shrink-0 px-2 py-0.5 rounded-md bg-muted/40">{formatDate(p.date_saved)}</span>
                           </div>
                           
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button 
+                          <p className="text-[13px] text-muted-foreground/90 leading-relaxed line-clamp-2 w-full mb-3">{p.content}</p>
+                          
+                          <div className="flex items-center justify-between mt-auto pt-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {p.category && (
+                                <span className="inline-flex items-center gap-1.5 text-[10.5px] font-semibold px-2.5 py-0.5 border border-border/40 rounded-full bg-background shadow-sm text-foreground" style={{ borderColor: `${p.categoryColor}30` }}>
+                                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: p.categoryColor || '#64748b' }} />
+                                  {p.category}
+                                </span>
+                              )}
+                              {p.note && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-accent text-accent-foreground border border-accent-foreground/10">
+                                  <StickyNote size={10} /> Has note
+                                </span>
+                              )}
+                              {p.notionSyncStatus === 'synced' && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400 border border-green-200 dark:border-green-800">
+                                  <Check size={9} /> Synced
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); setPostToDelete(p); }} 
+                                className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0" 
+                                title="Delete post">
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Thumbnail (Right) */}
+                        {p.postImageUrl && (
+                           <div className="hidden sm:block shrink-0 ml-2">
+                             <img src={p.postImageUrl} alt="Preview" className="w-[120px] h-[86px] object-cover rounded-xl border border-border/40 shadow-sm opacity-90 group-hover:opacity-100 transition-opacity" />
+                           </div>
+                        )}
+                      </div>
+                    )
+                  }
+
+                  // GRID VIEW
+                  return (
+                    <div key={p.id} className={`w-full text-left flex flex-col overflow-hidden transition-all duration-300 rounded-3xl border group cursor-pointer ${isSelected ? 'bg-background border-primary shadow-lg ring-1 ring-primary/20 scale-[1.02] -translate-y-1' : 'bg-card border-border/60 shadow-sm hover:border-border hover:shadow-xl hover:-translate-y-1'}`}
+                      onClick={() => setSelected(p)}>
+                      
+                      {/* Image Banner */}
+                      {p.postImageUrl ? (
+                        <div className="w-full h-36 shrink-0 relative overflow-hidden bg-muted/30 border-b border-border/40">
+                          <img src={p.postImageUrl} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                        </div>
+                      ) : (
+                        <div className="w-full h-10 shrink-0 bg-gradient-to-br from-muted/50 to-muted/20 border-b border-border/40" />
+                      )}
+
+                      {/* Card Content Base */}
+                      <div className="p-5 flex flex-col flex-1 relative">
+                        {/* Avatar floating above banner */}
+                        <div className={`absolute ${p.postImageUrl ? '-top-6' : '-top-5'} left-5 p-1 bg-card rounded-full shadow-sm`}>
+                           {p.authorImageUrl ? (
+                            <img src={p.authorImageUrl} alt={p.author} className="w-10 h-10 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-muted text-muted-foreground">
+                              {(p.author || 'U').substring(0, 2).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className={`flex items-center justify-between mb-3 ${p.postImageUrl ? 'ml-[52px]' : 'ml-[52px]'}`}>
+                           <h3 className="text-[14px] font-display font-semibold truncate group-hover:text-primary transition-colors max-w-[140px]">{p.author}</h3>
+                           <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md">{formatDate(p.date_saved)}</span>
+                        </div>
+
+                        <p className="text-[13px] text-muted-foreground border-l-2 border-primary/20 pl-3 leading-relaxed line-clamp-4 w-full mb-5 flex-1 group-hover:border-primary/50 transition-colors">
+                          {p.content}
+                        </p>
+
+                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border/30">
+                           <div className="flex items-center gap-2 overflow-hidden flex-1 pr-2">
+                             {p.category && (
+                                <span className="inline-flex shrink-0 items-center gap-1.5 text-[10px] font-semibold px-2.5 py-0.5 border border-border/40 rounded-full bg-background shadow-sm text-foreground max-w-full" style={{ borderColor: `${p.categoryColor}30` }}>
+                                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: p.categoryColor || '#64748b' }} />
+                                  <span className="truncate">{p.category}</span>
+                                </span>
+                              )}
+                              {p.note && (
+                                <span className="shrink-0 text-muted-foreground" title="Has Note"><StickyNote size={12} /></span>
+                              )}
+                           </div>
+                           <button 
                               onClick={(e) => { e.stopPropagation(); setPostToDelete(p); }} 
-                              className="p-1.5 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0" 
+                              className="p-1.5 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0 opacity-0 group-hover:opacity-100" 
                               title="Delete post">
                               <Trash2 size={14} />
                             </button>
-                            <div className="w-6 h-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center translate-x-1 group-hover:translate-x-0 transition-all shrink-0">
-                              <ChevronRight size={14} />
-                            </div>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -810,6 +913,21 @@ export function Dashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Footer */}
+      <footer className="shrink-0 flex items-center justify-center gap-6 px-6 h-12 border-t border-border/30 text-[12px] text-muted-foreground bg-background/60 backdrop-blur-sm z-20">
+        <a href="https://github.com/MohamedThabt/SaveIn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors font-medium">
+          <Github size={13} /> GitHub
+        </a>
+        <span className="w-1 h-1 rounded-full bg-border" />
+        <a href="https://sirthabet.dev/posts/savein-linkedin-chrome-extension-guide" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors font-medium">
+          <BookOpen size={13} /> Docs
+        </a>
+        <span className="w-1 h-1 rounded-full bg-border" />
+        <a href="https://sirthabet.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors font-medium">
+          <Globe size={13} /> Mohamed Thabet
+        </a>
+      </footer>
 
       {/* Toaster */}
       {toast && (
