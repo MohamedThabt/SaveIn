@@ -1,4 +1,4 @@
-# LinkedIn Saver
+# SaveIn
 
 A Chrome extension for saving, organizing, and exporting LinkedIn posts.
 
