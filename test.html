@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>LinkedIn Saver - Reload Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 40px;
+            background: #f3f4f6;
+        }
+
+        .card {
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #0a66c2;
+        }
+
+        .step {
+            margin: 16px 0;
+            padding: 12px;
+            background: #f1f5f9;
+            border-left: 4px solid #0a66c2;
+            border-radius: 4px;
+        }
+
+        .step strong {
+            color: #0a66c2;
+        }
+
+        code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        #status {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .ok {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>🔧 LinkedIn Saver - Extension Test</h1>
+        <div id="status">Checking...</div>
+
+        <h2>How to properly reload:</h2>
+        <div class="step"><strong>Step 1:</strong> Open a new tab and go to <code>chrome://extensions/</code></div>
+        <div class="step"><strong>Step 2:</strong> Find "LinkedIn Saver" in the list</div>
+        <div class="step"><strong>Step 3:</strong> <b>Toggle the extension OFF</b> (blue switch → grey)</div>
+        <div class="step"><strong>Step 4:</strong> Wait 2 seconds</div>
+        <div class="step"><strong>Step 5:</strong> <b>Toggle it back ON</b> (grey switch → blue)</div>
+        <div class="step"><strong>Step 6:</strong> Go to LinkedIn and press <code>Ctrl + Shift + R</code></div>
+        <div class="step"><strong>Step 7:</strong> Open console (<code>F12</code>) → look for "LinkedIn Saver
+            Diagnostics" messages</div>
+
+        <p style="margin-top:20px; color:#6b7280; font-size:14px;">
+            If toggling off/on doesn't work, click <b>"Remove"</b> on the extension, then click <b>"Load unpacked"</b>
+            again and select the <code>e:\linked in extention</code> folder.
+        </p>
+    </div>
+    <script>
+        // Test if chrome.storage API is available (proves extension context works)
+        try {
+            if (chrome && chrome.runtime && chrome.runtime.id) {
+                document.getElementById('status').className = 'ok';
+                document.getElementById('status').innerHTML = '✅ Extension is loaded! ID: ' + chrome.runtime.id;
+            } else {
+                document.getElementById('status').className = 'fail';
+                document.getElementById('status').innerHTML = '❌ Extension context not found. Please reload.';
+            }
+        } catch (e) {
+            document.getElementById('status').className = 'fail';
+            document.getElementById('status').innerHTML = '❌ Cannot detect extension: ' + e.message;
+        }
+    </script>
+</body>
+
+</html>
