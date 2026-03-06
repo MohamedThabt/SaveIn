@@ -21,7 +21,11 @@ import {
   Plus,
   StickyNote,
   Sun,
-  Moon
+  Moon,
+  RefreshCw,
+  Zap,
+  AlertCircle,
+  Loader2
 } from 'lucide-react'
 
 import {
@@ -48,6 +52,10 @@ interface Post {
   categoryColor?: string | null
   note?: string | null
   tags?: string[]
+  notionPageId?: string | null
+  notionSyncStatus?: 'pending' | 'synced' | 'failed' | null
+  notionLastSyncAt?: string | null
+  notionLastError?: string | null
 }
 
 interface Category {
@@ -85,6 +93,11 @@ export function Dashboard() {
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [notionToken, setNotionToken] = useState('')
   const [notionDb, setNotionDb] = useState('')
+  const [notionAutoSync, setNotionAutoSync] = useState(false)
+  const [testingNotion, setTestingNotion] = useState(false)
+  const [notionTestResult, setNotionTestResult] = useState<{ok: boolean; msg: string} | null>(null)
+  const [notionDbName, setNotionDbName] = useState('')
+  const [syncStats, setSyncStats] = useState({synced: 0, pending: 0, failed: 0, unsynced: 0})
   const [view, setView] = useState<'posts' | 'settings'>('posts')
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATS)
   const [newCatName, setNewCatName] = useState('')
@@ -122,10 +135,12 @@ export function Dashboard() {
   useEffect(() => {
     loadPosts()
     loadCategories()
+    loadSyncStats()
     chrome.storage.local.get(['settings', 'theme'], (res) => {
       const s = res.settings || {}
       if (s.notion_token) setNotionToken(s.notion_token)
       if (s.notion_db_id) setNotionDb(s.notion_db_id)
+      if (s.notion_auto_sync) setNotionAutoSync(true)
       
       const t = res.theme || 'light'
       setTheme(t)
@@ -234,14 +249,63 @@ export function Dashboard() {
     r.readAsText(f)
   }
 
-  const saveNotion = () => {
-    chrome.storage.local.set({ settings: { notion_token: notionToken, notion_db_id: notionDb } }, () => flash('Settings saved'))
+  const extractDbId = (input: string): string => {
+    // Accept raw ID or full Notion URL
+    const urlMatch = input.match(/([a-f0-9]{32}|[a-f0-9-]{36})/)
+    return urlMatch ? urlMatch[1].replace(/-/g, '') : input.trim()
+  }
+
+  const saveNotionSettings = () => {
+    const dbId = extractDbId(notionDb)
+    if (!notionToken && !dbId) { flash('Enter at least a token to save', false); return }
+    chrome.runtime.sendMessage({
+      action: 'SAVE_NOTION_SETTINGS',
+      payload: { notion_token: notionToken, notion_db_id: dbId, notion_auto_sync: notionAutoSync }
+    }, () => flash('Notion settings saved'))
+  }
+
+  const testNotion = () => {
+    const dbId = extractDbId(notionDb)
+    if (!notionToken || !dbId) { flash('Enter token and database URL first', false); return }
+    setTestingNotion(true)
+    setNotionTestResult(null)
+    chrome.runtime.sendMessage({ action: 'TEST_NOTION', token: notionToken, dbId }, (res) => {
+      setTestingNotion(false)
+      if (res?.success) {
+        setNotionTestResult({ ok: true, msg: `Connected to "${res.dbName}"` })
+        setNotionDbName(res.dbName)
+      } else {
+        setNotionTestResult({ ok: false, msg: res?.error || 'Connection failed' })
+      }
+    })
+  }
+
+  const syncAll = () => {
+    chrome.runtime.sendMessage({ action: 'SYNC_ALL' }, (res) => {
+      flash(`Queued ${res?.queued || 0} posts for sync`)
+      loadSyncStats()
+    })
+  }
+
+  const retryFailed = () => {
+    chrome.runtime.sendMessage({ action: 'RETRY_FAILED' }, (res) => {
+      flash(`Retrying ${res?.queued || 0} failed posts`)
+      loadSyncStats()
+    })
+  }
+
+  const loadSyncStats = () => {
+    chrome.runtime.sendMessage({ action: 'GET_SYNC_STATS' }, (res) => {
+      if (res) setSyncStats(res)
+    })
   }
 
   const pushNotion = () => {
     if (!selected) return
-    chrome.runtime.sendMessage({ action: 'PUSH_NOTION', payload: selected }, (res) => {
-      flash(res?.success ? 'Pushed to Notion!' : (res?.error || 'Failed to push'), res?.success)
+    chrome.runtime.sendMessage({ action: 'SYNC_POST', postId: selected.id }, (res) => {
+      flash(res?.success ? 'Synced to Notion!' : (res?.error || 'Sync failed'), res?.success)
+      loadPosts()
+      loadSyncStats()
     })
   }
 
@@ -330,19 +394,92 @@ export function Dashboard() {
           {/* Notion */}
           <section className="mb-12 bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
             <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><Upload size={20} className="text-primary" /> Notion Integration</h2>
-            <p className="text-sm text-muted-foreground mb-6">Automatically sync or push your saved content directly into your connected Notion database.</p>
+            <p className="text-sm text-muted-foreground mb-6">Connect your Notion workspace to automatically sync saved posts into a database.</p>
             <div className="flex flex-col gap-5 max-w-xl">
+              {/* Step 1: Token */}
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block">Integration Token</label>
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block">Step 1 — Integration Token</label>
+                <p className="text-[12px] text-muted-foreground mb-2">Create an integration at <a href="https://www.notion.so/my-integrations" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">notion.so/my-integrations</a>, then paste the token below.</p>
                 <input type="password" value={notionToken} onChange={(e) => setNotionToken(e.target.value)} placeholder="secret_..." className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm bg-background outline-none transition-all focus:border-ring focus:ring-2 focus:ring-ring/20 shadow-sm" />
               </div>
+              {/* Step 2: Database URL */}
               <div>
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block">Target Database ID</label>
-                <input value={notionDb} onChange={(e) => setNotionDb(e.target.value)} placeholder="abc123def..." className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm bg-background outline-none transition-all focus:border-ring focus:ring-2 focus:ring-ring/20 shadow-sm" />
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block">Step 2 — Database URL or ID</label>
+                <p className="text-[12px] text-muted-foreground mb-2">Open your Notion database, click <strong>Share → Copy link</strong>, and paste it here. A raw database ID also works.</p>
+                <input value={notionDb} onChange={(e) => setNotionDb(e.target.value)} placeholder="https://notion.so/workspace/abc123... or abc123def456..." className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm bg-background outline-none transition-all focus:border-ring focus:ring-2 focus:ring-ring/20 shadow-sm" />
               </div>
-              <button onClick={saveNotion} className="self-start px-6 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-2 mt-2">
-                <Check size={16} /> Save credentials
-              </button>
+              {/* Test + Save */}
+              <div className="flex items-center gap-3">
+                <button onClick={testNotion} disabled={testingNotion} className="px-5 py-2.5 bg-background border border-border/60 rounded-xl text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all shadow-sm flex items-center gap-2 disabled:opacity-50">
+                  {testingNotion ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                  Test Connection
+                </button>
+                <button onClick={saveNotionSettings} className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-2">
+                  <Check size={14} /> Save Settings
+                </button>
+              </div>
+              {/* Test Result */}
+              {notionTestResult && (
+                <div className={`flex items-center gap-2 text-sm font-medium px-4 py-3 rounded-xl border ${notionTestResult.ok ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-950 dark:border-green-800 dark:text-green-400' : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950 dark:border-red-800 dark:text-red-400'}`}>
+                  {notionTestResult.ok ? <Check size={14} /> : <AlertCircle size={14} />}
+                  {notionTestResult.msg}
+                </div>
+              )}
+              {notionDbName && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check size={14} className="text-green-500" /> Connected to: <strong className="text-foreground">{notionDbName}</strong>
+                </div>
+              )}
+              {/* Sync Options */}
+              <div className="border-t border-border/40 pt-5 mt-1">
+                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 block">Sync Options</label>
+                {/* Auto-sync toggle */}
+                <div className="flex items-center justify-between p-4 bg-background border border-border/60 rounded-xl mb-4">
+                  <div className="flex items-center gap-3">
+                    <Zap size={16} className={notionAutoSync ? 'text-primary' : 'text-muted-foreground'} />
+                    <div>
+                      <div className="text-[13px] font-semibold">Auto-sync new saves</div>
+                      <div className="text-[11px] text-muted-foreground">Automatically push posts to Notion when saved</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { const next = !notionAutoSync; setNotionAutoSync(next); chrome.runtime.sendMessage({ action: 'SAVE_NOTION_SETTINGS', payload: { notion_auto_sync: next } }) }}
+                    className={`w-11 h-6 rounded-full transition-colors relative ${notionAutoSync ? 'bg-primary' : 'bg-border'}`}
+                  >
+                    <div className={`w-5 h-5 rounded-full bg-white shadow-sm absolute top-0.5 transition-all ${notionAutoSync ? 'left-[22px]' : 'left-0.5'}`} />
+                  </button>
+                </div>
+                {/* Sync stats */}
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  <div className="text-center p-2 bg-background border border-border/40 rounded-lg">
+                    <div className="text-[15px] font-bold text-green-600">{syncStats.synced}</div>
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Synced</div>
+                  </div>
+                  <div className="text-center p-2 bg-background border border-border/40 rounded-lg">
+                    <div className="text-[15px] font-bold text-amber-500">{syncStats.pending}</div>
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Pending</div>
+                  </div>
+                  <div className="text-center p-2 bg-background border border-border/40 rounded-lg">
+                    <div className="text-[15px] font-bold text-red-500">{syncStats.failed}</div>
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Failed</div>
+                  </div>
+                  <div className="text-center p-2 bg-background border border-border/40 rounded-lg">
+                    <div className="text-[15px] font-bold text-muted-foreground">{syncStats.unsynced}</div>
+                    <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Unsynced</div>
+                  </div>
+                </div>
+                {/* Sync actions */}
+                <div className="flex gap-3">
+                  <button onClick={syncAll} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md">
+                    <RefreshCw size={14} /> Sync All
+                  </button>
+                  {syncStats.failed > 0 && (
+                    <button onClick={retryFailed} className="flex items-center justify-center gap-2 px-4 py-2.5 border border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400 rounded-xl text-sm font-semibold hover:bg-amber-50 dark:hover:bg-amber-950 transition-all">
+                      <AlertCircle size={14} /> Retry {syncStats.failed} Failed
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </section>
 
@@ -518,6 +655,21 @@ export function Dashboard() {
                                 <StickyNote size={10} /> Has note
                               </span>
                             )}
+                            {p.notionSyncStatus === 'synced' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400 border border-green-200 dark:border-green-800">
+                                <Check size={8} /> Synced
+                              </span>
+                            )}
+                            {p.notionSyncStatus === 'pending' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                <Loader2 size={8} className="animate-spin" /> Syncing
+                              </span>
+                            )}
+                            {p.notionSyncStatus === 'failed' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400 border border-red-200 dark:border-red-800">
+                                <AlertCircle size={8} /> Failed
+                              </span>
+                            )}
                           </div>
                           
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -608,6 +760,13 @@ export function Dashboard() {
               </div>
 
               <div className="px-6 pt-6 pb-2">
+                {selected.notionSyncStatus && (
+                  <div className="flex items-center gap-2 text-[12px] font-medium mb-4 px-3 py-2.5 rounded-xl border border-border/40 bg-muted/30">
+                    {selected.notionSyncStatus === 'synced' && <><Check size={12} className="text-green-500" /><span className="text-green-600 dark:text-green-400">Synced to Notion</span>{selected.notionLastSyncAt && <span className="text-muted-foreground">· {formatDate(selected.notionLastSyncAt)}</span>}</>}
+                    {selected.notionSyncStatus === 'pending' && <><Loader2 size={12} className="animate-spin text-amber-500" /><span className="text-amber-600 dark:text-amber-400">Syncing to Notion...</span></>}
+                    {selected.notionSyncStatus === 'failed' && <><AlertCircle size={12} className="text-red-500" /><span className="text-red-600 dark:text-red-400">Sync failed</span><span className="text-muted-foreground text-[11px] truncate">· {selected.notionLastError}</span></>}
+                  </div>
+                )}
                 <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 mb-4 block">Actions</span>
                 <div className="grid grid-cols-2 gap-2.5">
                   <button onClick={exportMd} className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-xl border border-border/60 bg-background hover:border-primary/40 hover:shadow-md transition-all group">
@@ -615,8 +774,13 @@ export function Dashboard() {
                     <span className="text-[11px] font-semibold">Markdown</span>
                   </button>
                   <button onClick={pushNotion} className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-xl border border-border/60 bg-background hover:border-primary/40 hover:shadow-md transition-all group">
-                    <Upload size={16} className="text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span className="text-[11px] font-semibold">Notion Sync</span>
+                    {selected.notionSyncStatus === 'synced' ? (
+                      <><RefreshCw size={16} className="text-green-500 group-hover:text-primary transition-colors" /><span className="text-[11px] font-semibold">Re-sync</span></>
+                    ) : selected.notionSyncStatus === 'pending' ? (
+                      <><Loader2 size={16} className="animate-spin text-amber-500" /><span className="text-[11px] font-semibold">Syncing...</span></>
+                    ) : (
+                      <><Upload size={16} className="text-muted-foreground group-hover:text-primary transition-colors" /><span className="text-[11px] font-semibold">Notion Sync</span></>
+                    )}
                   </button>
                   <button onClick={() => setPostToDelete(selected)} className="col-span-2 flex items-center justify-center gap-2 p-3.5 rounded-xl border border-destructive/20 bg-destructive/5 text-destructive hover:bg-destructive hover:text-destructive-foreground hover:shadow-md transition-all shadow-sm">
                     <Trash2 size={15} />

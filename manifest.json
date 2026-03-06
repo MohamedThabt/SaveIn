@@ -3,8 +3,8 @@
   "name": "SaveIn",
   "version": "2.0.0",
   "description": "Save LinkedIn posts with metadata, export to Markdown/JSON, and push to Notion.",
-  "permissions": ["storage", "activeTab", "downloads", "webRequest"],
-  "host_permissions": ["*://*.linkedin.com/*"],
+  "permissions": ["storage", "activeTab", "downloads", "webRequest", "alarms"],
+  "host_permissions": ["*://*.linkedin.com/*", "https://api.notion.com/*"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
