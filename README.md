@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="icons/icon128.png" alt="SaveIn Logo" width="120" />
-
 # ✨ SaveIn
 
 ### Your Personal LinkedIn Content Library
