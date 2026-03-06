@@ -122,7 +122,7 @@ SaveIn can automatically sync your saved posts to a Notion database. Here's how 
 
 ### Step 1 — Create a Notion Integration
 
-1. Go to [notion.so/profile/integrations](https://www.notion.so/profile/integrations)
+1. Go to [Notion Internal Integrations](https://www.notion.so/profile/integrations/internal)
 2. Click **New integration**
 3. **Important:** Make sure the type is **Internal** (not Public)
 4. Give it a name (e.g. "SaveIn")
