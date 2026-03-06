@@ -30,7 +30,9 @@ import {
   List,
   Github,
   BookOpen,
-  Globe
+  Globe,
+  ArrowUpDown,
+  ChevronDown
 } from 'lucide-react'
 
 import {
@@ -104,11 +106,14 @@ export function Dashboard() {
   const [notionDbName, setNotionDbName] = useState('')
   const [syncStats, setSyncStats] = useState({synced: 0, pending: 0, failed: 0, unsynced: 0})
   const [view, setView] = useState<'posts' | 'settings'>('posts')
+  const [settingsTab, setSettingsTab] = useState<'appearance' | 'categories' | 'notion' | 'data'>('appearance')
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATS)
   const [newCatName, setNewCatName] = useState('')
   const [newCatColor, setNewCatColor] = useState('#3b82f6')
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+  const [filterAuthor, setFilterAuthor] = useState('')
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'author'>('newest')
 
   // Modals state
   const [postToDelete, setPostToDelete] = useState<Post | null>(null)
@@ -171,11 +176,28 @@ export function Dashboard() {
     chrome.storage.local.set({ theme: next })
   }
 
-  const filtered = useMemo(() => posts.filter((p) => {
-    const q = !searchQuery || p.content?.toLowerCase().includes(searchQuery.toLowerCase()) || p.author?.toLowerCase().includes(searchQuery.toLowerCase())
-    const c = !filterCategory || p.category === filterCategory
-    return q && c
-  }), [posts, searchQuery, filterCategory])
+  const filtered = useMemo(() => {
+    const list = posts.filter((p) => {
+      const q = !searchQuery || p.content?.toLowerCase().includes(searchQuery.toLowerCase()) || p.author?.toLowerCase().includes(searchQuery.toLowerCase()) || (p.tags || []).some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+      const c = !filterCategory || p.category === filterCategory
+      const a = !filterAuthor || p.author === filterAuthor
+      return q && c && a
+    })
+    if (sortBy === 'oldest') return [...list].sort((a, b) => new Date(a.date_saved).getTime() - new Date(b.date_saved).getTime())
+    if (sortBy === 'author') return [...list].sort((a, b) => (a.author || '').localeCompare(b.author || ''))
+    return list // already sorted newest by loadPosts
+  }, [posts, searchQuery, filterCategory, filterAuthor, sortBy])
+
+  const authorList = useMemo(() => {
+    const map = new Map<string, { count: number; img?: string | null }>()
+    posts.forEach(p => {
+      if (!p.author) return
+      const existing = map.get(p.author)
+      if (existing) { existing.count++ }
+      else { map.set(p.author, { count: 1, img: p.authorImageUrl }) }
+    })
+    return Array.from(map.entries()).sort((a, b) => b[1].count - a[1].count)
+  }, [posts])
 
   const stats = useMemo(() => {
     const cats = new Set<string>(); const authors = new Set<string>(); let recent = 0
@@ -358,169 +380,240 @@ export function Dashboard() {
   if (view === 'settings') {
     return (
       <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden font-sans scroll-smooth">
-        <header className="flex items-center gap-3 px-8 h-16 border-b border-border/60 shrink-0 bg-background/80 backdrop-blur-xl z-10 shadow-sm">
+        <header className="flex items-center gap-3 px-8 h-16 border-b border-border/60 shrink-0 bg-background/80 backdrop-blur-xl z-20 shadow-sm relative">
           <button onClick={() => setView('posts')} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/80 hover:shadow-sm transition-all text-muted-foreground hover:text-foreground">
             <ArrowLeft size={18} />
           </button>
-          <span className="text-lg font-display font-semibold">Preferences</span>
-          <div className="flex-1" />
-          <button onClick={toggleTheme} className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted/80 transition-all text-muted-foreground hover:text-foreground" title="Toggle Theme">
-            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-          </button>
+          <span className="text-lg font-display font-semibold">Settings</span>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-10 max-w-4xl mx-auto w-full">
-          {/* Categories */}
-          <section className="mb-12 bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
-            <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><Palette size={20} className="text-primary" /> Label Categories</h2>
-            <p className="text-sm text-muted-foreground mb-6">Manage distinct labels to organize and highlight your saved posts creatively.</p>
-            <div className="flex flex-wrap gap-2.5 mb-6">
-              {categories.map((c) => (
-                <div key={c.name} className="flex items-center gap-2 px-4 py-2 border border-border/60 rounded-full bg-background text-[13px] font-medium group transition-all hover:border-border shadow-sm">
-                  <span className="w-3 h-3 rounded-full shrink-0 shadow-sm" style={{ background: c.color }} />
-                  {c.name}
-                  <button onClick={() => setCategoryToDelete(c.name)} className="opacity-40 group-hover:opacity-100 transition-opacity ml-1 bg-destructive/10 rounded-full p-1 hover:bg-destructive/20 text-destructive">
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-3 max-w-md">
-              <input value={newCatName} onChange={(e) => setNewCatName(e.target.value)} placeholder="Type new category..." className="flex-1 px-4 py-2.5 border border-border/60 rounded-xl text-sm bg-background outline-none transition-all focus:border-ring focus:ring-2 focus:ring-ring/20 shadow-sm" />
-              <div className="relative w-11 h-11 shrink-0 rounded-xl border border-border/60 shadow-sm overflow-hidden flex items-center justify-center cursor-pointer hover:border-border transition-colors">
-                <input type="color" value={newCatColor} onChange={(e) => setNewCatColor(e.target.value)} className="absolute inset-[-10px] w-20 h-20 opacity-0 cursor-pointer z-10" />
-                <div className="w-5 h-5 rounded-full shadow-inner" style={{ background: newCatColor }} />
-              </div>
-              <button onClick={addCategory} className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-2">
-                <Plus size={16} /> Create
+        <div className="flex-1 flex overflow-hidden w-full max-w-[1400px] mx-auto">
+          {/* Settings Sidebar */}
+          <aside className="w-[240px] border-r border-border/40 p-6 flex flex-col gap-2 shrink-0 bg-muted/5 overflow-y-auto hidden md:flex">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2 px-3">Preferences</div>
+            <nav className="flex flex-col gap-1.5">
+              <button onClick={() => setSettingsTab('appearance')} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${settingsTab === 'appearance' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                <Palette size={16} /> Appearance
               </button>
+              <button onClick={() => setSettingsTab('categories')} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${settingsTab === 'categories' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                <Tag size={16} /> Categories
+              </button>
+              <button onClick={() => setSettingsTab('notion')} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${settingsTab === 'notion' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                <Upload size={16} /> Notion Sync
+              </button>
+              <button onClick={() => setSettingsTab('data')} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${settingsTab === 'data' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}>
+                <FolderUp size={16} /> Data Management
+              </button>
+            </nav>
+            <div className="mt-auto pt-6 border-t border-border/40 flex flex-col gap-3 px-3">
+              <a href="https://github.com/MohamedThabt/SaveIn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[13px] text-muted-foreground hover:text-primary transition-colors font-medium">
+                <Github size={14} /> Source Code
+              </a>
+              <a href="https://sirthabet.dev/posts/savein-linkedin-chrome-extension-guide" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[13px] text-muted-foreground hover:text-primary transition-colors font-medium">
+                <BookOpen size={14} /> Documentation
+              </a>
+              <a href="https://sirthabet.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[13px] text-muted-foreground hover:text-primary transition-colors font-medium">
+                <Globe size={14} /> Mohamed Thabet
+              </a>
             </div>
-          </section>
+          </aside>
 
-          {/* Notion */}
-          <section className="mb-12 bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
-            <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><Upload size={20} className="text-primary" /> Notion Integration</h2>
-            <p className="text-sm text-muted-foreground mb-6">Connect your Notion workspace to automatically sync saved posts into a database.</p>
-            <div className="flex flex-col gap-5 max-w-xl">
-              {/* Step 1: Token */}
-              <div>
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block">Step 1 — Integration Token</label>
-                <p className="text-[12px] text-muted-foreground mb-2">Create an integration at <a href="https://www.notion.so/my-integrations" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">notion.so/my-integrations</a>, then paste the token below.</p>
-                <input type="password" value={notionToken} onChange={(e) => setNotionToken(e.target.value)} placeholder="secret_..." className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm bg-background outline-none transition-all focus:border-ring focus:ring-2 focus:ring-ring/20 shadow-sm" />
-              </div>
-              {/* Step 2: Database URL */}
-              <div>
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2 block">Step 2 — Database URL or ID</label>
-                <p className="text-[12px] text-muted-foreground mb-2">Open your Notion database, click <strong>Share → Copy link</strong>, and paste it here. A raw database ID also works.</p>
-                <input value={notionDb} onChange={(e) => setNotionDb(e.target.value)} placeholder="https://notion.so/workspace/abc123... or abc123def456..." className="w-full px-4 py-3 border border-border/60 rounded-xl text-sm bg-background outline-none transition-all focus:border-ring focus:ring-2 focus:ring-ring/20 shadow-sm" />
-              </div>
-              {/* Test + Save */}
-              <div className="flex items-center gap-3">
-                <button onClick={testNotion} disabled={testingNotion} className="px-5 py-2.5 bg-background border border-border/60 rounded-xl text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all shadow-sm flex items-center gap-2 disabled:opacity-50">
-                  {testingNotion ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                  Test Connection
-                </button>
-                <button onClick={saveNotionSettings} className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-2">
-                  <Check size={14} /> Save Settings
-                </button>
-              </div>
-              {/* Test Result */}
-              {notionTestResult && (
-                <div className={`flex items-center gap-2 text-sm font-medium px-4 py-3 rounded-xl border ${notionTestResult.ok ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-950 dark:border-green-800 dark:text-green-400' : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950 dark:border-red-800 dark:text-red-400'}`}>
-                  {notionTestResult.ok ? <Check size={14} /> : <AlertCircle size={14} />}
-                  {notionTestResult.msg}
-                </div>
-              )}
-              {notionDbName && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Check size={14} className="text-green-500" /> Connected to: <strong className="text-foreground">{notionDbName}</strong>
-                </div>
-              )}
-              {/* Sync Options */}
-              <div className="border-t border-border/40 pt-5 mt-1">
-                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 block">Sync Options</label>
-                {/* Auto-sync toggle */}
-                <div className="flex items-center justify-between p-4 bg-background border border-border/60 rounded-xl mb-4">
-                  <div className="flex items-center gap-3">
-                    <Zap size={16} className={notionAutoSync ? 'text-primary' : 'text-muted-foreground'} />
-                    <div>
-                      <div className="text-[13px] font-semibold">Auto-sync new saves</div>
-                      <div className="text-[11px] text-muted-foreground">Automatically push posts to Notion when saved</div>
+          {/* Settings Content */}
+          <main className="flex-1 overflow-y-auto p-6 md:p-10 lg:p-14 relative bg-background">
+            <div className="max-w-2xl mx-auto w-full transition-all duration-300">
+              
+              {settingsTab === 'appearance' && (
+                <section className="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                  <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><Palette size={20} className="text-primary" /> Appearance</h2>
+                  <p className="text-sm text-muted-foreground mb-8">Customize the look and feel of the extention dashboard.</p>
+                  
+                  <div className="flex flex-col gap-6">
+                    <div className="flex items-center justify-between p-4 bg-muted/30 border border-border/60 rounded-xl">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${theme === 'light' ? 'bg-amber-100 text-amber-600' : 'bg-primary/20 text-primary'}`}>
+                          {theme === 'light' ? <Sun size={20} /> : <Moon size={20} />}
+                        </div>
+                        <div>
+                          <div className="text-[14px] font-semibold">{theme === 'light' ? 'Light Mode' : 'Dark Mode'}</div>
+                          <div className="text-[12px] text-muted-foreground">Toggle between light and dark themes.</div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={toggleTheme}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${theme === 'dark' ? 'bg-primary' : 'bg-border hover:bg-border/80'}`}
+                      >
+                        <div className={`w-5 h-5 rounded-full bg-white shadow-sm absolute top-0.5 transition-all ${theme === 'dark' ? 'left-[26px]' : 'left-0.5'}`} />
+                      </button>
                     </div>
                   </div>
-                  <button
-                    onClick={() => { const next = !notionAutoSync; setNotionAutoSync(next); chrome.runtime.sendMessage({ action: 'SAVE_NOTION_SETTINGS', payload: { notion_auto_sync: next } }) }}
-                    className={`w-11 h-6 rounded-full transition-colors relative ${notionAutoSync ? 'bg-primary' : 'bg-border'}`}
-                  >
-                    <div className={`w-5 h-5 rounded-full bg-white shadow-sm absolute top-0.5 transition-all ${notionAutoSync ? 'left-[22px]' : 'left-0.5'}`} />
-                  </button>
-                </div>
-                {/* Sync stats */}
-                <div className="grid grid-cols-4 gap-2 mb-4">
-                  <div className="text-center p-2 bg-background border border-border/40 rounded-lg">
-                    <div className="text-[15px] font-bold text-green-600">{syncStats.synced}</div>
-                    <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Synced</div>
+                </section>
+              )}
+
+              {settingsTab === 'categories' && (
+                <section className="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                  <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><Tag size={20} className="text-primary" /> Label Categories</h2>
+                  <p className="text-sm text-muted-foreground mb-6">Manage distinct labels to organize and highlight your saved posts creatively.</p>
+                  <div className="flex flex-wrap gap-2.5 mb-6">
+                    {categories.map((c) => (
+                      <div key={c.name} className="flex items-center gap-2 px-4 py-2 border border-border/60 rounded-full bg-background text-[13px] font-medium group transition-all hover:border-border shadow-sm">
+                        <span className="w-3 h-3 rounded-full shrink-0 shadow-sm" style={{ background: c.color }} />
+                        {c.name}
+                        <button onClick={() => setCategoryToDelete(c.name)} className="opacity-40 hover:opacity-100 transition-opacity ml-1 bg-destructive/10 rounded-full p-1 hover:bg-destructive/20 text-destructive">
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                  <div className="text-center p-2 bg-background border border-border/40 rounded-lg">
-                    <div className="text-[15px] font-bold text-amber-500">{syncStats.pending}</div>
-                    <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Pending</div>
-                  </div>
-                  <div className="text-center p-2 bg-background border border-border/40 rounded-lg">
-                    <div className="text-[15px] font-bold text-red-500">{syncStats.failed}</div>
-                    <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Failed</div>
-                  </div>
-                  <div className="text-center p-2 bg-background border border-border/40 rounded-lg">
-                    <div className="text-[15px] font-bold text-muted-foreground">{syncStats.unsynced}</div>
-                    <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Unsynced</div>
-                  </div>
-                </div>
-                {/* Sync actions */}
-                <div className="flex gap-3">
-                  <button onClick={syncAll} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md">
-                    <RefreshCw size={14} /> Sync All
-                  </button>
-                  {syncStats.failed > 0 && (
-                    <button onClick={retryFailed} className="flex items-center justify-center gap-2 px-4 py-2.5 border border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400 rounded-xl text-sm font-semibold hover:bg-amber-50 dark:hover:bg-amber-950 transition-all">
-                      <AlertCircle size={14} /> Retry {syncStats.failed} Failed
+                  <div className="flex gap-3 max-w-md bg-muted/30 p-4 rounded-xl border border-border/50">
+                    <input value={newCatName} onChange={(e) => setNewCatName(e.target.value)} placeholder="Type new category..." className="flex-1 px-4 py-2.5 border border-border/60 rounded-lg text-sm bg-background outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm" />
+                    <div className="relative w-11 h-11 shrink-0 rounded-lg border border-border/60 shadow-sm overflow-hidden flex items-center justify-center cursor-pointer hover:border-border transition-colors bg-background">
+                      <input type="color" value={newCatColor} onChange={(e) => setNewCatColor(e.target.value)} className="absolute inset-[-10px] w-20 h-20 opacity-0 cursor-pointer z-10" />
+                      <div className="w-5 h-5 rounded-full shadow-inner" style={{ background: newCatColor }} />
+                    </div>
+                    <button onClick={addCategory} className="px-5 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-2">
+                       Create
                     </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </section>
+                  </div>
+                </section>
+              )}
 
-          {/* Data Management */}
-          <section className="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
-            <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><FolderUp size={20} className="text-primary" /> Data & Backups</h2>
-            <p className="text-sm text-muted-foreground mb-6">Safely export your storage or import an old backup JSON payload.</p>
-            <div className="flex flex-wrap gap-4">
-              <button onClick={exportBackup} className="flex items-center justify-center gap-2.5 px-6 py-3 border border-border/80 shadow-sm bg-background rounded-xl text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all">
-                <Download size={16} /> Export JSON Payload
-              </button>
-              <button onClick={exportAllMd} className="flex items-center justify-center gap-2.5 px-6 py-3 border border-border/80 shadow-sm bg-background rounded-xl text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all">
-                <FileText size={16} /> Export All (MD)
-              </button>
-              <label className="flex items-center justify-center gap-2.5 px-6 py-3 border border-border/80 shadow-sm bg-background rounded-xl text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all cursor-pointer">
-                <Upload size={16} /> Restore from File
-                <input type="file" accept=".json" onChange={importBackup} className="hidden" />
-              </label>
-            </div>
-          </section>
+              {settingsTab === 'notion' && (
+                <section className="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                  <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><Upload size={20} className="text-primary" /> Notion Integration</h2>
+                  <p className="text-sm text-muted-foreground mb-6">Connect your Notion workspace to automatically sync saved posts into a database.</p>
+                  <div className="flex flex-col gap-6">
+                    {/* Step 1: Token */}
+                    <div className="bg-muted/30 p-5 rounded-xl border border-border/50">
+                      <label className="text-[12px] font-bold text-foreground mb-1 block">Integration Token</label>
+                      <p className="text-[12px] text-muted-foreground mb-3">Create an integration at <a href="https://www.notion.so/my-integrations" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">notion.so/my-integrations</a>, then paste the token below.</p>
+                      <input type="password" value={notionToken} onChange={(e) => setNotionToken(e.target.value)} placeholder="secret_..." className="w-full px-4 py-3 border border-border/50 rounded-lg text-sm bg-background outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm" />
+                    </div>
+                    {/* Step 2: Database URL */}
+                    <div className="bg-muted/30 p-5 rounded-xl border border-border/50">
+                      <label className="text-[12px] font-bold text-foreground mb-1 block">Database URL or ID</label>
+                      <p className="text-[12px] text-muted-foreground mb-3">Open your Notion database, click <strong>Share → Copy link</strong>, and paste it here.</p>
+                      <input value={notionDb} onChange={(e) => setNotionDb(e.target.value)} placeholder="https://notion.so/workspace/abc123..." className="w-full px-4 py-3 border border-border/50 rounded-lg text-sm bg-background outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm" />
+                    </div>
+                    {/* Test + Save */}
+                    <div className="flex items-center gap-3">
+                      <button onClick={testNotion} disabled={testingNotion} className="px-5 py-3 bg-secondary text-secondary-foreground border border-border/60 rounded-xl text-sm font-semibold hover:bg-secondary/80 transition-all shadow-sm flex items-center gap-2 disabled:opacity-50 flex-1 justify-center">
+                        {testingNotion ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                        Test Connection
+                      </button>
+                      <button onClick={saveNotionSettings} className="px-6 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md flex items-center gap-2 flex-1 justify-center">
+                        <Check size={16} /> Save Credentials
+                      </button>
+                    </div>
+                    {/* Test Result */}
+                    {notionTestResult && (
+                      <div className={`flex items-center gap-2 text-sm font-medium px-4 py-3 rounded-xl border ${notionTestResult.ok ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
+                        {notionTestResult.ok ? <Check size={16} /> : <AlertCircle size={16} />}
+                        {notionTestResult.msg}
+                      </div>
+                    )}
+                    {notionDbName && !notionTestResult && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
+                        <Check size={16} className="text-green-500" /> Connected to workspace DB: <strong className="text-foreground">{notionDbName}</strong>
+                      </div>
+                    )}
+                    
+                    {/* Sync Options */}
+                    <div className="pt-4 mt-2 border-t border-border/50">
+                      <div className="flex items-center justify-between p-5 bg-muted/40 border border-border/60 rounded-xl mb-6">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${notionAutoSync ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                            <Zap size={18} />
+                          </div>
+                          <div>
+                            <div className="text-[14px] font-bold">Auto-sync directly</div>
+                            <div className="text-[12px] text-muted-foreground">Automatically push posts to Notion when saved on LinkedIn</div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => { const next = !notionAutoSync; setNotionAutoSync(next); chrome.runtime.sendMessage({ action: 'SAVE_NOTION_SETTINGS', payload: { notion_auto_sync: next } }) }}
+                          className={`w-12 h-6 rounded-full transition-colors relative ${notionAutoSync ? 'bg-primary' : 'bg-border hover:bg-border/80'}`}
+                        >
+                          <div className={`w-5 h-5 rounded-full bg-white shadow-sm absolute top-0.5 transition-all ${notionAutoSync ? 'left-[26px]' : 'left-0.5'}`} />
+                        </button>
+                      </div>
 
-          {/* Footer */}
-          <footer className="mt-8 mb-4 pt-6 border-t border-border/30 flex items-center justify-center gap-6 text-[12px] text-muted-foreground">
-            <a href="https://github.com/MohamedThabt/SaveIn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors font-medium">
-              <Github size={13} /> GitHub
-            </a>
-            <span className="w-1 h-1 rounded-full bg-border" />
-            <a href="https://sirthabet.dev/posts/savein-linkedin-chrome-extension-guide" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors font-medium">
-              <BookOpen size={13} /> Docs
-            </a>
-            <span className="w-1 h-1 rounded-full bg-border" />
-            <a href="https://sirthabet.dev" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors font-medium">
-              <Globe size={13} /> Mohamed Thabet
-            </a>
-          </footer>
+                      <h3 className="text-[12px] font-bold text-foreground mb-3 uppercase tracking-wider">Sync Status</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                        <div className="text-center p-4 bg-muted/20 border border-border/40 rounded-xl">
+                          <div className="text-[18px] font-bold text-green-500 mb-1">{syncStats.synced}</div>
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Synced</div>
+                        </div>
+                        <div className="text-center p-4 bg-muted/20 border border-border/40 rounded-xl">
+                          <div className="text-[18px] font-bold text-amber-500 mb-1">{syncStats.pending}</div>
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pending</div>
+                        </div>
+                        <div className="text-center p-4 bg-muted/20 border border-border/40 rounded-xl">
+                          <div className="text-[18px] font-bold text-red-500 mb-1">{syncStats.failed}</div>
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Failed</div>
+                        </div>
+                        <div className="text-center p-4 bg-muted/20 border border-border/40 rounded-xl">
+                          <div className="text-[18px] font-bold text-muted-foreground mb-1">{syncStats.unsynced}</div>
+                          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Unsynced</div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button onClick={syncAll} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md">
+                          <RefreshCw size={16} /> Sync All Missing
+                        </button>
+                        {syncStats.failed > 0 && (
+                          <button onClick={retryFailed} className="flex flex-1 items-center justify-center gap-2 px-4 py-3 bg-destructive/10 text-destructive border border-destructive/20 rounded-xl text-sm font-semibold hover:bg-destructive/20 transition-all">
+                            <AlertCircle size={16} /> Retry {syncStats.failed} Failed
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+              {settingsTab === 'data' && (
+                <section className="bg-card border border-border/50 rounded-2xl p-8 shadow-sm">
+                  <h2 className="text-xl font-display font-semibold mb-2 flex items-center gap-2.5"><FolderUp size={20} className="text-primary" /> Data Management</h2>
+                  <p className="text-sm text-muted-foreground mb-6">Safely export your storage or restore from an earlier backup JSON file.</p>
+                  
+                  <div className="space-y-4">
+                    <div className="p-4 border border-border/50 rounded-xl bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-[14px] font-semibold mb-1">Export Full JSON Backup</h3>
+                        <p className="text-[12px] text-muted-foreground">Download all posts, labels, and metadata as a raw JSON file. Restorable later.</p>
+                      </div>
+                      <button onClick={exportBackup} className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 border border-border/80 shadow-sm bg-background rounded-lg text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all">
+                        <Download size={16} /> Export JSON
+                      </button>
+                    </div>
+
+                    <div className="p-4 border border-border/50 rounded-xl bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-[14px] font-semibold mb-1">Restore from Backup</h3>
+                        <p className="text-[12px] text-muted-foreground">Upload an existing JSON backup. This merges with current data cleanly.</p>
+                      </div>
+                      <label className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 border border-border/80 shadow-sm bg-background rounded-lg text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all cursor-pointer">
+                        <Upload size={16} /> Import
+                        <input type="file" accept=".json" onChange={importBackup} className="hidden" />
+                      </label>
+                    </div>
+
+                    <div className="p-4 border border-border/50 rounded-xl bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="text-[14px] font-semibold mb-1">Export as Markdown Files</h3>
+                        <p className="text-[12px] text-muted-foreground">Turn every saved post into a single massive unified markdown file.</p>
+                      </div>
+                      <button onClick={exportAllMd} className="shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 border border-border/80 shadow-sm bg-background rounded-lg text-sm font-semibold hover:border-primary/50 hover:text-primary transition-all">
+                        <FileText size={16} /> Export MD
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              )}
+
+            </div>
+          </main>
         </div>
 
         {/* Delete Category Alert */}
@@ -578,7 +671,8 @@ export function Dashboard() {
 
       <div className="flex flex-1 overflow-hidden relative z-10">
         {/* Sidebar */}
-        <aside className="w-[240px] border-r border-border/50 flex flex-col bg-card/40 shrink-0">
+        <aside className="w-[260px] border-r border-border/50 flex flex-col bg-card/40 shrink-0">
+          {/* Stats */}
           <div className="grid grid-cols-2 gap-2 p-4">
             {[
               { icon: Bookmark, value: stats.total, label: 'Saved' },
@@ -594,14 +688,39 @@ export function Dashboard() {
             ))}
           </div>
 
-          <div className="px-4 pb-4 flex flex-col gap-4 flex-1 overflow-y-auto mt-2">
+          <div className="px-4 pb-4 flex flex-col gap-5 flex-1 overflow-y-auto mt-1">
+            {/* Search */}
             <div className="relative group">
               <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search content..." className="w-full pl-9 pr-3 py-2.5 bg-background border border-border/60 rounded-xl text-[13px] font-medium outline-none transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/10 shadow-sm placeholder:text-muted-foreground/70" />
+              <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search posts, authors, tags..." className="w-full pl-9 pr-8 py-2.5 bg-background border border-border/60 rounded-xl text-[13px] font-medium outline-none transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/10 shadow-sm placeholder:text-muted-foreground/60" />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            {/* Sort */}
+            <div>
+              <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2 block pl-1">Sort By</span>
+              <div className="relative">
+                <ArrowUpDown size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'author')}
+                  className="w-full pl-8 pr-3 py-2 bg-background border border-border/60 rounded-xl text-[12px] font-semibold outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 transition-all appearance-none cursor-pointer shadow-sm text-foreground"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="author">Author A → Z</option>
+                </select>
+                <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              </div>
             </div>
             
+            {/* Categories */}
             <div>
-              <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-3 block pl-1">Categories</span>
+              <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2.5 block pl-1">Categories</span>
               <div className="flex flex-col gap-1">
                 <button onClick={() => setFilterCategory('')} className={`text-[12px] font-semibold px-3 py-2 rounded-xl transition-all flex items-center justify-between w-full ${!filterCategory ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}>
                   <span>All Saves</span>
@@ -613,7 +732,7 @@ export function Dashboard() {
                   return (
                     <button key={c.name} onClick={() => setFilterCategory(active ? '' : c.name)} className={`text-[12px] font-semibold px-3 py-2 rounded-xl transition-all flex items-center justify-between w-full group ${active ? 'bg-background border border-border/60 shadow-sm text-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}>
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full shrink-0 shadow-sm" style={{ background: c.color }} />
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm ring-1 ring-black/5" style={{ background: c.color }} />
                         <span>{c.name}</span>
                       </div>
                       <span className={`text-[10px] py-0.5 px-1.5 rounded-md transition-colors ${active ? 'bg-muted text-muted-foreground' : 'bg-transparent group-hover:bg-background/80 text-muted-foreground/60 group-hover:text-muted-foreground'}`}>{count}</span>
@@ -622,6 +741,41 @@ export function Dashboard() {
                 })}
               </div>
             </div>
+
+            {/* Authors */}
+            <div>
+              <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-widest mb-2.5 block pl-1">Authors</span>
+              <div className="flex flex-col gap-1 max-h-[200px] overflow-y-auto pr-1">
+                {authorList.map(([name, { count, img }]) => {
+                  const active = filterAuthor === name
+                  return (
+                    <button key={name} onClick={() => setFilterAuthor(active ? '' : name)} className={`text-[12px] font-medium px-3 py-2 rounded-xl transition-all flex items-center justify-between w-full group ${active ? 'bg-background border border-border/60 shadow-sm text-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}>
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {img ? (
+                          <img src={img} alt={name} className="w-5 h-5 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[8px] font-bold shrink-0">
+                            {name.substring(0, 1).toUpperCase()}
+                          </div>
+                        )}
+                        <span className="truncate">{name}</span>
+                      </div>
+                      <span className={`text-[10px] py-0.5 px-1.5 rounded-md transition-colors shrink-0 ${active ? 'bg-muted text-muted-foreground' : 'bg-transparent group-hover:bg-background/80 text-muted-foreground/60 group-hover:text-muted-foreground'}`}>{count}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Active Filters */}
+            {(filterCategory || filterAuthor || searchQuery) && (
+              <button
+                onClick={() => { setFilterCategory(''); setFilterAuthor(''); setSearchQuery(''); setSortBy('newest'); }}
+                className="text-[11px] font-semibold text-destructive hover:text-destructive/80 flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-destructive/5 transition-all w-full"
+              >
+                <X size={12} /> Clear All Filters
+              </button>
+            )}
           </div>
         </aside>
 
