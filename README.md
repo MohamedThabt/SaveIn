@@ -22,41 +22,48 @@ You find amazing posts on LinkedIn — career advice, industry insights, useful 
 
 ## Download & Install
 
-### Step 1 — Download the extension
+### For Normal Users
 
-```
-Download or clone this repository to your computer.
-```
+Download this file:
 
-If you have Git installed, run:
+- `savein-extension.zip`
+
+After downloading:
+
+1. Extract `savein-extension.zip`
+2. Open the extracted `SaveIn` folder
+3. Double-click `INSTALL.txt` if you want the short version
+4. Open Chrome and go to `chrome://extensions`
+5. Turn on **Developer mode**
+6. Click **Load unpacked**
+7. Select the extracted `SaveIn` folder
+8. Open LinkedIn and start using the extension
+
+What the ZIP contains:
+
+- The ready-to-install extension files
+- `INSTALL.txt` with short setup instructions
+- No build step required for normal users
+
+### For Developers
+
+If you want to build the extension yourself:
+
 ```bash
 git clone https://github.com/your-username/savein.git
-```
-
-Or click the green **Code** button on GitHub → **Download ZIP**, then unzip the folder.
-
-### Step 2 — Build it
-
-You need [Node.js](https://nodejs.org/) (version 18 or newer) and [pnpm](https://pnpm.io/) installed on your computer.
-
-Open a terminal in the SaveIn folder and run:
-
-```bash
+cd savein
 pnpm install
 pnpm build
+pnpm package:zip
 ```
 
-This creates a `dist` folder — that's the finished extension.
+This creates a shareable ZIP here:
 
-### Step 3 — Load into Chrome
+```text
+release/savein-extension.zip
+```
 
-1. Open Chrome and go to `chrome://extensions`
-2. Turn on **Developer mode** (toggle in the top-right corner)
-3. Click **Load unpacked**
-4. Select the `dist` folder inside the SaveIn directory
-5. Done! You'll see the SaveIn icon in your Chrome toolbar
-
-### Step 4 — Go to LinkedIn
+### Open the extension
 
 Open [linkedin.com](https://www.linkedin.com). You'll see a small floating save button appear — that's SaveIn ready to go.
 

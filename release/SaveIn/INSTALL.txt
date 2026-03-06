@@ -1,0 +1,9 @@
+SaveIn - Installation Guide
+
+1. Open Chrome and go to: chrome://extensions
+2. Turn on Developer mode
+3. Click Load unpacked
+4. Select this SaveIn folder
+5. Open LinkedIn and start using the extension
+
+If the extension does not appear on LinkedIn, refresh the page once.

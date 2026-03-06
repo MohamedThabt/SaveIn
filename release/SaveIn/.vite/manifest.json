@@ -1,0 +1,57 @@
+{
+  "../@crx/manifest": {
+    "file": "assets/crx-manifest.js-DeHUxexU.js",
+    "name": "crx-manifest.js",
+    "src": "../@crx/manifest",
+    "isEntry": true
+  },
+  "_createLucideIcon-!~{004}~.js": {
+    "file": "assets/createLucideIcon-CaBC0Ljh.css",
+    "src": "_createLucideIcon-!~{004}~.js"
+  },
+  "_createLucideIcon-DZAY0_7T.js": {
+    "file": "assets/createLucideIcon-DZAY0_7T.js",
+    "name": "createLucideIcon",
+    "css": [
+      "assets/createLucideIcon-CaBC0Ljh.css"
+    ]
+  },
+  "_main-DuJYiANo.js": {
+    "file": "assets/main-DuJYiANo.js",
+    "name": "main",
+    "imports": [
+      "_createLucideIcon-DZAY0_7T.js"
+    ]
+  },
+  "dashboard.html": {
+    "file": "assets/dashboard-D-jnuzwi.js",
+    "name": "dashboard",
+    "src": "dashboard.html",
+    "isEntry": true,
+    "imports": [
+      "_createLucideIcon-DZAY0_7T.js"
+    ]
+  },
+  "popup.html": {
+    "file": "assets/popup.html-BhyMupGO.js",
+    "name": "popup.html",
+    "src": "popup.html",
+    "isEntry": true,
+    "imports": [
+      "_createLucideIcon-DZAY0_7T.js",
+      "_main-DuJYiANo.js"
+    ]
+  },
+  "src/background/index.ts": {
+    "file": "assets/index.ts-C9iS3Sml.js",
+    "name": "index.ts",
+    "src": "src/background/index.ts",
+    "isEntry": true
+  },
+  "src/content/index.ts": {
+    "file": "assets/index.ts-EsKE1p4_.js",
+    "name": "index.ts",
+    "src": "src/content/index.ts",
+    "isEntry": true
+  }
+}
