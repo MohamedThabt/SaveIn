@@ -172,6 +172,9 @@ Then load it in Chrome:
 2. Enable **Developer mode**
 3. Click **Load unpacked** → select the `dist/` folder
 
+> [!TIP]
+> **New Developer?** Check out our dedicated [📚 Developer Documentation](docs/index.md) covering local setup, architecture, and code style!
+
 </details>
 
 <br />
@@ -312,6 +315,8 @@ SaveIn/
 | **Storage** | Chrome Storage API (local) |
 | **Sync** | Notion REST API |
 
+> For a deeper dive into how these systems interact, see the [Architecture Overview](docs/architecture.md) in our developer docs.
+
 <br />
 
 ---
@@ -370,16 +375,19 @@ SaveIn/
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how you can help:
+Contributions are heavily encouraged and welcomed! 
+
+Before writing code, please check out the comprehensive [Developer Documentation Guide](docs/index.md) which includes:
+*   [Local Setup & Build instructions](docs/setup.md)
+*   [Architectural Overview](docs/architecture.md)
+*   [Code Style and Standards](docs/styling.md)
+*   [Detailed Contributing Guidelines](docs/CONTRIBUTING.md)
 
 1. **Fork** the repository
 2. **Create** your feature branch (`git checkout -b feature/amazing-feature`)
 3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
 4. **Push** to the branch (`git push origin feature/amazing-feature`)
 5. **Open** a Pull Request
-
-> [!IMPORTANT]
-> Please read the [Documentation](docs/) before contributing to understand the codebase architecture.
 
 <br />
 
