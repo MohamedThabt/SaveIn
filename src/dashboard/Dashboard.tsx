@@ -711,7 +711,7 @@ export function Dashboard() {
         {/* Center: Search */}
         <div className="flex-1 max-w-md mx-6 relative group">
           <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-          <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search posts, authors, tags..." className="w-full pl-9 pr-8 py-2.5 bg-muted/40 border border-border/50 rounded-xl text-[13px] font-medium outline-none transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/10 focus:bg-background shadow-sm placeholder:text-muted-foreground/60" />
+          <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search posts, authors, tags..." className="w-full pl-9 pr-8 py-2.5 bg-muted/50 border border-border/50 rounded-xl text-[13px] font-medium outline-none transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/10 shadow-sm placeholder:text-muted-foreground/60" />
           {searchQuery && (
             <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
               <X size={13} />
