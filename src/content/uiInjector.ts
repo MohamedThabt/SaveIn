@@ -213,18 +213,17 @@ function createSaveWidget(postNode: Element, saveBtn?: HTMLElement) {
       saveBtnEl.textContent = 'Saving...'
       saveBtnEl.style.opacity = '0.6'
 
-      // Send flattened payload to background (backward-compatible)
+      // Send full payload to background
       const payload = {
         id: postData.id,
         urn: postData.urn,
         url: postData.postUrl,
         author: postData.authorName,
-        authorProfileUrl: null,
-        content: '',
-        timestamp: null,
-        likes: null,
-        comments: null,
-        images: [],
+        authorProfileUrl: postData.authorProfileUrl,
+        authorImageUrl: postData.authorImageUrl,
+        postImageUrl: postData.postImageUrl,
+        content: postData.content,
+        timestamp: postData.timestamp,
         date_saved: postData.savedAt,
         category: postData.category,
         categoryColor: postData.categoryColor,
@@ -387,12 +386,11 @@ export function setupAutoSave() {
       urn: postData.urn,
       url: postData.postUrl,
       author: postData.authorName,
-      authorProfileUrl: null,
-      content: '',
-      timestamp: null,
-      likes: null,
-      comments: null,
-      images: [],
+      authorProfileUrl: postData.authorProfileUrl,
+      authorImageUrl: postData.authorImageUrl,
+      postImageUrl: postData.postImageUrl,
+      content: postData.content,
+      timestamp: postData.timestamp,
       date_saved: postData.savedAt,
       category: null,
       tags: [] as string[],

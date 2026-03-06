@@ -7,12 +7,11 @@ export interface PostData {
   urn: string | null
   authorName: string
   authorProfileUrl: string | null
+  authorImageUrl: string | null
   postUrl: string
+  postImageUrl: string | null
   content: string
   timestamp: string | null
-  likes: number | null
-  comments: number | null
-  images: string[]
   savedAt: string | null
   category: string | null
   categoryColor: string | null

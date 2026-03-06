@@ -7,6 +7,8 @@ interface Post {
   author: string
   content: string
   date_saved: string
+  authorImageUrl?: string | null
+  postImageUrl?: string | null
   category?: string | null
   tags?: string[]
 }
@@ -166,7 +168,12 @@ export function Popup() {
                 </span>
               </div>
 
-              <h3 className="text-sm font-bold mb-1">{latestPost.author}</h3>
+              <h3 className="text-sm font-bold mb-1 flex items-center gap-2">
+                {latestPost.authorImageUrl ? (
+                  <img src={latestPost.authorImageUrl} alt={latestPost.author} className="w-6 h-6 rounded-full object-cover" />
+                ) : null}
+                {latestPost.author}
+              </h3>
               <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-2 pl-2.5 border-l-2 border-border">
                 {latestPost.content?.substring(0, 120)}
                 {(latestPost.content?.length || 0) > 120 ? '...' : ''}

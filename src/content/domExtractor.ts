@@ -192,6 +192,36 @@ function extractTimestamp(node: Element): string | null {
   return timeEl?.getAttribute('datetime') || timeEl?.dateTime || null
 }
 
+function extractAuthorImageUrl(node: Element): string | null {
+  // Primary: data-view-name attribute on the actor-image link
+  const actorImg = node.querySelector('a[data-view-name="feed-actor-image"] figure img[src]') as HTMLImageElement | null
+  if (actorImg?.src) return actorImg.src
+
+  // Fallback: first small img inside the actor component
+  const actors = Array.from(node.querySelectorAll('.update-components-actor'))
+  const searchNode = actors.length > 1 ? actors[1] : (actors[0] || node)
+  const img = searchNode.querySelector('img[src]') as HTMLImageElement | null
+  if (img?.src && img.width <= 128) return img.src
+
+  return null
+}
+
+function extractPostImageUrl(node: Element): string | null {
+  // 1. Article preview image
+  const articleImg = node.querySelector('a[data-view-name="feed-article"] figure img[src]') as HTMLImageElement | null
+  if (articleImg?.src) return articleImg.src
+
+  // 2. Video poster
+  const videoImg = node.querySelector('.vjs-poster img[src]') as HTMLImageElement | null
+  if (videoImg?.src) return videoImg.src
+
+  // 3. Inline image in post body (update-components-image)
+  const inlineImg = node.querySelector('.update-components-image img[src]') as HTMLImageElement | null
+  if (inlineImg?.src) return inlineImg.src
+
+  return null
+}
+
 /**
  * Extract a complete PostData object from a DOM element.
  * This is the primary extraction method — fast and safe because it uses already rendered data.
@@ -202,12 +232,11 @@ export function extractPostFromDOM(postElement: Element): PostData {
     urn: getUrn(postElement),
     authorName: extractAuthor(postElement),
     authorProfileUrl: extractAuthorProfileUrl(postElement),
+    authorImageUrl: extractAuthorImageUrl(postElement),
     postUrl: extractUrl(postElement),
+    postImageUrl: extractPostImageUrl(postElement),
     content: extractContent(postElement),
     timestamp: extractTimestamp(postElement),
-    likes: null,      // Not reliably available from DOM
-    comments: null,    // Not reliably available from DOM
-    images: [],        // Could be extended to extract image URLs
     savedAt: null,
     category: null,
     categoryColor: null,

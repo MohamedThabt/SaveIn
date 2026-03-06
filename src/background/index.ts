@@ -10,10 +10,9 @@ interface Post {
   date_saved: string
   urn?: string | null
   authorProfileUrl?: string | null
+  authorImageUrl?: string | null
+  postImageUrl?: string | null
   timestamp?: string | null
-  likes?: number | null
-  comments?: number | null
-  images?: string[]
   category?: string | null
   categoryColor?: string | null
   note?: string | null

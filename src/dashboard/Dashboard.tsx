@@ -41,6 +41,9 @@ interface Post {
   author: string
   content: string
   date_saved: string
+  authorProfileUrl?: string | null
+  authorImageUrl?: string | null
+  postImageUrl?: string | null
   category?: string | null
   categoryColor?: string | null
   note?: string | null
@@ -489,9 +492,13 @@ export function Dashboard() {
                   return (
                     <div key={p.id} className={`w-full text-left p-4 flex flex-col sm:flex-row items-start gap-4 transition-all duration-300 rounded-2xl border group cursor-pointer ${isSelected ? 'bg-background border-primary shadow-md ring-1 ring-primary/20 scale-[1.01]' : 'bg-card border-border/60 shadow-sm hover:border-primary/40 hover:shadow-md hover:scale-[1.01]'}`}
                       onClick={() => setSelected(p)}>
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-colors ${isSelected ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary/80'}`}>
-                        {(p.author || 'U').substring(0, 2).toUpperCase()}
-                      </div>
+                      {p.authorImageUrl ? (
+                        <img src={p.authorImageUrl} alt={p.author} className={`w-10 h-10 rounded-full object-cover shrink-0 transition-shadow ${isSelected ? 'ring-2 ring-primary/30' : 'group-hover:ring-2 group-hover:ring-primary/10'}`} />
+                      ) : (
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-colors ${isSelected ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary/80'}`}>
+                          {(p.author || 'U').substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0 pr-2">
                         <div className="flex items-center justify-between mb-1">
                           <h3 className="text-[13.5px] font-display font-bold truncate group-hover:text-primary transition-colors">{p.author}</h3>
@@ -545,9 +552,13 @@ export function Dashboard() {
             <div className="flex-1 overflow-y-auto pt-14 pb-6 scroll-smooth">
               <div className="px-6 pt-6 pb-5 border-b border-border/40 bg-gradient-to-b from-muted/30 to-transparent">
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="w-11 h-11 rounded-2xl shadow-sm flex items-center justify-center text-[15px] font-bold shrink-0" style={{ background: `${selected.categoryColor || '#3b82f6'}15`, color: selected.categoryColor || '#3b82f6', border: `1px solid ${selected.categoryColor || '#3b82f6'}30` }}>
-                    {(selected.author || 'U').substring(0, 2).toUpperCase()}
-                  </div>
+                  {selected.authorImageUrl ? (
+                    <img src={selected.authorImageUrl} alt={selected.author} className="w-11 h-11 rounded-2xl shadow-sm object-cover shrink-0" />
+                  ) : (
+                    <div className="w-11 h-11 rounded-2xl shadow-sm flex items-center justify-center text-[15px] font-bold shrink-0" style={{ background: `${selected.categoryColor || '#3b82f6'}15`, color: selected.categoryColor || '#3b82f6', border: `1px solid ${selected.categoryColor || '#3b82f6'}30` }}>
+                      {(selected.author || 'U').substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <h3 className="text-base font-display font-bold text-foreground leading-tight mb-1">{selected.author}</h3>
                     <div className="flex items-center gap-2">
@@ -565,6 +576,13 @@ export function Dashboard() {
                 <div className="px-6 py-5 border-b border-border/40">
                   <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 mb-3"><StickyNote size={12} className="text-primary/70" /> Annotations</div>
                   <div className="text-[13px] text-foreground/90 bg-primary/5 p-4 rounded-xl border border-primary/10 italic leading-relaxed shadow-sm">{selected.note}</div>
+                </div>
+              )}
+
+              {selected.postImageUrl && (
+                <div className="px-6 py-5 border-b border-border/40">
+                  <div className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80 mb-3">Media Preview</div>
+                  <img src={selected.postImageUrl} alt="Post media" className="w-full rounded-xl border border-border/40 shadow-sm object-cover max-h-[200px]" />
                 </div>
               )}
 

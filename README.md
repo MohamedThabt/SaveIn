@@ -1,66 +1,62 @@
-# SaveIn 🚀
+# LinkedIn Saver
 
-**SaveIn** is a high-performance, professional-grade Chrome extension designed for elite content curation on LinkedIn. It empowers users to capture, organize, and archive valuable industry insights with a seamless, intuitive workflow.
+A Chrome extension for saving, organizing, and exporting LinkedIn posts.
 
----
+## Features
 
-## 🌟 Features
+- **Drag-to-Save** — grab the floating button and drop it on any LinkedIn post to capture it instantly
+- **Auto-Save** — click LinkedIn's native Save button and the post is captured automatically
+- **Rich Extraction** — captures author name, profile URL, avatar, post URL, post media/image, text content, and timestamp using stable DOM selectors
+- **Categories & Tags** — organize saved posts with color-coded labels and free-form tags
+- **Full-Text Search** — find any post by author or content
+- **Dashboard** — browse your library in a responsive grid with avatar images, media previews, and inline notes
+- **Popup** — view and edit the latest saved post directly from the toolbar
+- **Notion Integration** — push saved posts to a Notion database
+- **Export** — download individual or bulk exports as Markdown or full JSON backup
+- **Dark Mode** — toggle light/dark themes
 
-### 🖱️ Drag-to-Save Workflow
-The signature feature of **SaveIn**. Simply grab the floating "Capture" button and drop it onto any LinkedIn post. Our intelligent **DOM Extractor** instantly identifies the post URN and author, even on LinkedIn's latest dynamic layouts.
+## Tech Stack
 
-### 🍱 Minimal & Clean
-Focused on what matters. **SaveIn** captures the core identifiers:
-- **Direct Share Link**: Accurate URLs for every post.
-- **Original Author**: Captures the source, even from reposts.
-- **Categorization**: Tag posts with professional labels (Tech, Design, Market, etc.).
+- TypeScript, React 18, Vite
+- Tailwind CSS, Radix UI, Lucide icons
+- Chrome Extension Manifest V3
+- Chrome Storage API for persistence
 
-### 📂 Sophisticated Dashboard
-Manage your professional library in a stunning, modern interface:
-- **Full-Text Search**: Find that specific insight in seconds.
-- **Label Management**: Create and color-code custom categories.
-- **Theme Support**: Seamless transition between Light and Dark modes.
+## Getting Started
 
-### 🔗 Notion Integration
-Push your curated library directly to your Notion workspace. Perfect for research, CRM tracking, or personal knowledge management.
+```bash
+# Install dependencies
+pnpm install
 
----
+# Development build with HMR
+pnpm dev
 
-## 🛠️ Technology Stack
+# Production build
+pnpm build
+```
 
-- **React & TypeScript**: Robust, type-safe frontend components.
-- **Vite**: Ultra-fast build tool for modern extension development.
-- **Tailwind CSS**: Sleek, responsive design system.
-- **Chrome Extension API (V3)**: Optimized for performance and privacy.
-- **Radix UI & Lucide**: High-quality UI primitives and iconography.
+Load the extension in Chrome:
 
----
+1. Open `chrome://extensions`
+2. Enable **Developer mode**
+3. Click **Load unpacked** and select the `dist` directory
 
-## 🚀 Getting Started
+## Architecture
 
-### Installation
-1.  Clone this repository.
-2.  Install dependencies:
-    ```bash
-    pnpm install
-    ```
-3.  Build the project:
-    ```bash
-    pnpm build
-    ```
-4.  Load into Chrome:
-    - Open `chrome://extensions/`
-    - Enable **Developer mode**.
-    - Click **Load unpacked** and select the `dist` directory.
+```
+src/
+  background/    Service worker — storage, Notion API, message routing
+  content/       Content scripts injected into linkedin.com
+    domExtractor  DOM-based post extraction (author, images, URN, content)
+    postScanner   Post element detection across feed/profile/group pages
+    uiInjector    Save widget overlay, floating cursor, auto-save listener
+    types         Shared PostData contract
+  dashboard/     Full-page React dashboard (dashboard.html)
+  popup/         Toolbar popup (popup.html)
+```
 
----
+Posts are extracted using stable `data-view-name` and `data-view-tracking-scope` attributes rather than obfuscated class names, making the extension resilient to LinkedIn UI changes.
 
-## 📈 Architecture
+## License
 
-**SaveIn** utilizes a lightweight **DOM-first architecture**. Instead of heavy background scanning, it uses a precise hit-testing algorithm for the drag-to-save interaction, ensuring zero performance impact on your browsing experience.
-
----
-
-## 📄 License
-
-MIT License - Copyright (c) 2026 SaveIn Team
+MIT
