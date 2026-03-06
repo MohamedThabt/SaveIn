@@ -42,6 +42,10 @@ function createSaveWidget(postNode: Element, saveBtn?: HTMLElement) {
   const existing = postNode.querySelector('.ls-widget-overlay')
   if (existing) { existing.remove(); return }
 
+  // Extract post data BEFORE injecting the widget so the widget's UI text
+  // doesn't contaminate the extracted content
+  const postData = extractPostFromDOM(postNode)
+
   const overlay = document.createElement('div')
   overlay.className = 'ls-widget-overlay'
   overlay.style.cssText = `
@@ -202,8 +206,7 @@ function createSaveWidget(postNode: Element, saveBtn?: HTMLElement) {
     widget.querySelector('.ls-save-btn')?.addEventListener('click', () => {
       const note = (widget.querySelector('.ls-note') as HTMLTextAreaElement).value.trim()
 
-      // Use the DOM extraction pipeline
-      const postData = extractPostFromDOM(postNode)
+      // Use the pre-extracted post data (captured before widget injection)
       postData.category = selectedCategory || null
       postData.categoryColor = selectedColor || null
       postData.note = note || null
